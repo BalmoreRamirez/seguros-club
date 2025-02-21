@@ -1,0 +1,51 @@
+<template>
+  <DataTable :value="data" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+             tableStyle="min-width: 50rem">
+    <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
+    <Column header="Seguro">
+      <template #body="{data}">
+        <Tag :value="data.seguro" :severity="data.seguro?'success' : 'warning'">
+          {{data.seguro?'Pagado':'Pendiente'}}
+        </Tag>
+      </template>
+    </Column>
+    <Column v-if="haveActions">
+      <template #header>
+        <span>Acciones</span>
+      </template>
+      <template #body="{data}">
+        <slot name="actions" :data="data"></slot>
+      </template>
+    </Column>
+  </DataTable>
+</template>
+
+<script setup>
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Tag from 'primevue/tag';
+
+const props = defineProps({
+      data: {
+        type: Array,
+        required: true
+      },
+      columns: {
+        type: Array,
+        required: true,
+      },
+      haveActions: {
+        type: Boolean,
+        default: false,
+      },
+    }
+);
+
+</script>
+<style scoped>
+
+::v-deep .p-datatable-thead > tr > th {
+  background-color: #172554;
+  color: white;
+}
+</style>
