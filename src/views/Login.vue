@@ -24,16 +24,22 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axiosInstance from "../axiosConfig.js";
 
 const username = ref('');
 const password = ref('');
 const router = useRouter();
 
-const handleLogin = () => {
-  if (username.value === 'admin' && password.value === '12345') {
-    localStorage.setItem('auth', 'true');
-    router.push('/home');
-  } else {
+const handleLogin = async () => {
+  try {
+    const response = await axiosInstance.post('/login', {
+      user: username.value,
+      password: password.value
+    });
+    const token = response.data.token;
+    localStorage.setItem('auth', token);
+    await router.push('/home');
+  } catch (error) {
     alert('Invalid credentials');
   }
 };
