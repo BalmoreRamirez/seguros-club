@@ -16,7 +16,8 @@
         <template #actions="{data}">
           <div class="flex justify-left items-center">
             <div v-for="(action, index) in actions" :key="index">
-              <button  :key="action.label" type="button" class="bg-transparent rounded-full px-1" @click="() => action.onClick(data)">
+              <button :key="action.label" type="button" class="bg-transparent rounded-full px-1"
+                      @click="() => action.onClick(data)">
                 <i class="pi pi-eye text-customBlue-500"></i>
               </button>
             </div>
@@ -85,32 +86,7 @@ import {useRouter} from "vue-router";
 
 const router = useRouter();
 const showModal = ref(false);
-const DataClub = ref([
-  {
-    id: 1,
-    iglesia: "Iglesia 1",
-    distrito: "Distrito 1",
-    zona: "Zona 1",
-    direccion: "Dirección 1",
-    pastor: "Pastor 1",
-  },
-  {
-    id: 2,
-    iglesia: "Iglesia 2",
-    distrito: "Distrito 2",
-    zona: "Zona 2",
-    direccion: "Dirección 2",
-    pastor: "Pastor 2",
-  },
-  {
-    id: 3,
-    iglesia: "Iglesia 3",
-    distrito: "Distrito 3",
-    zona: "Zona 3",
-    direccion: "Dirección 3",
-    pastor: "Pastor 3",
-  },
-]);
+const DataClub = ref([]);
 const club = ref({
   iglesia: "",
   distrito: "",
@@ -154,13 +130,33 @@ const actions = ref([
     },
   }
 ]);
+const fetchClubs = async () => {
+  try {
+    const response = await axiosInstance.get('/clubs');
+    console.log(response.data);
+    DataClub.value = response.data;
+  } catch (e) {
+    console.error(e);
+  }
+}
 const addClub = async () => {
   if (v$.value.$invalid) {
     v$.value.$touch();
     return;
   }
   try {
-    await axiosInstance.post('/clubes', club.value);
+    const response = await axiosInstance.post('/clubs', club.value);
+    if (response.status === 201) {
+      DataClub.value.push(response.data);
+      club.value = {
+        iglesia: "",
+        distrito: "",
+        zona: "",
+        direccion: "",
+        pastor: "",
+      };
+      showModal.value = false;
+    }
     console.log('Club agregado');
   } catch (e) {
     console.error(e);
@@ -180,6 +176,9 @@ const generarPdf = () => {
   });
   doc.save("lista_de_clubes.pdf");
 }
+onMounted(() => {
+  fetchClubs();
+});
 </script>
 
 <style>

@@ -81,33 +81,12 @@ import DataTable from "../components/DataTable.vue";
 import {helpers, required} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 const router = useRouter();
+const route = useRoute()
 const showModal = ref(false);
-const DataClub = ref([
-  {
-    id: 1,
-    nombre: "Juan",
-    edad: 20,
-    telefono: "123456789",
-    seguro: true
-  },
-  {
-    id: 2,
-    nombre: "Pedro",
-    edad: 25,
-    telefono: "987654321",
-    seguro: false
-  },
-  {
-    id: 3,
-    nombre: "María",
-    edad: 30,
-    telefono: "123456789",
-    seguro: true
-  },
-]);
+const DataClub = ref([]);
 const club = ref({
   nombre: "",
   edad: "",
@@ -148,6 +127,7 @@ const actions = ref([
     },
   }
 ]);
+
 const addClub = async () => {
   if (v$.value.$invalid) {
     v$.value.$touch();
@@ -160,6 +140,22 @@ const addClub = async () => {
     console.error(e);
   }
 }
+
+const fetchMiembros = async () => {
+  try {
+    const id = route.params.id;
+    const response = await axiosInstance.get(`/miembros/${id}`);
+    console.log(response.data);
+    DataClub.value = response.data;
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+onMounted(() => {
+  fetchMiembros();
+});
+
 const generarPdf = () => {
   const doc = new jsPDF();
   const title = "Miembros del club";
@@ -176,6 +172,7 @@ const generarPdf = () => {
   });
   doc.save("lista_de_clubes.pdf");
 }
+
 </script>
 
 <style>
