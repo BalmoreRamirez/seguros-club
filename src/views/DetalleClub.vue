@@ -73,10 +73,10 @@
       </span>
         </div>
         <div class="field">
-          <label for="fecha_nacimiento">Fecha de nacimiento</label>
-          <Calendar v-model="v$.fecha_nacimiento.$model" :maxDate="new Date()" class="!w-full"/>
-          <span v-if="v$.fecha_nacimiento.$dirty && v$.fecha_nacimiento.$error" class="text-red-600">
-        {{ v$.fecha_nacimiento.required.$message }}
+          <label for="edad">Edad</label>
+          <InputNumber v-model="v$.edad.$model" class="!w-full"/>
+          <span v-if="v$.edad.$dirty && v$.edad.$error" class="text-red-600">
+        {{ v$.edad.required.$message }}
       </span>
         </div>
       </div>
@@ -114,8 +114,16 @@
         </div>
         <div class="field">
           <label for="seguro">¿Pago de seguro?</label>
-          <RadioButton v-model="v$.pago_seguro.$model" inputId="seguro1" name="seguro" value="true"/>
-          <RadioButton v-model="v$.pago_seguro.$model" inputId="seguro2" name="seguro" value="false"/>
+          <div class="flex flex-wrap gap-3">
+            <div class="flex align-items-center">
+              <RadioButton v-model="v$.pago_seguro.$model" inputId="seguro1" name="seguro" value="true"/>
+              <label for="ingredient1" class="ml-2">si</label>
+            </div>
+            <div class="flex align-items-center">
+              <RadioButton v-model="v$.pago_seguro.$model" inputId="seguro2" name="seguro" value="false"/>
+              <label for="ingredient2" class="ml-2">no</label>
+            </div>
+          </div>
         </div>
       </div>
       <div class="my-5 flex">
@@ -132,6 +140,7 @@ import InputText from "primevue/inputtext";
 import Calendar from "primevue/calendar";
 import RadioButton from "primevue/radiobutton";
 import InputMask from "primevue/inputmask";
+import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
 import axiosInstance from "../axiosConfig.js";
 import {useVuelidate} from "@vuelidate/core";
@@ -153,7 +162,7 @@ const miembroClub = ref({
   is_alergico_a: "",
   enfermedad_padese: "",
   medicamento_receta: "",
-  fecha_nacimiento: "",
+  edad: "",
   nombres_responsable: "",
   apellidos_responsable: "",
   telefono_responsable: "",
@@ -180,7 +189,7 @@ const rules = {
   medicamento_receta: {
     required: helpers.withMessage("La información sobre medicamentos es requerida", required),
   },
-  fecha_nacimiento: {
+  edad: {
     required: helpers.withMessage("La fecha de nacimiento es requerida", required),
   },
   nombres_responsable: {
@@ -241,7 +250,6 @@ const fetchMiembros = async () => {
   try {
     const id = route.params.id;
     const response = await axiosInstance.get(`/miembros/${id}`);
-    console.log(response.data);
     DataClub.value = response.data;
   } catch (e) {
     console.error(e);
