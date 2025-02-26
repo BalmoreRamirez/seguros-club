@@ -28,6 +28,13 @@
     <Dialog header="Agregar Transacción" v-model:visible="showModal" :modal="true" :closable="true">
       <div class="p-fluid grid grid-cols-2 gap-4">
         <div class="field">
+          <label for="cuenta">Club</label>
+          <InputText v-model="v$.direccion.$model" class="!w-full"/>
+          <span v-if="v$.direccion.$dirty && v$.direccion.$error" class="text-red-600">
+            {{ v$.direccion.required.$message }}
+          </span>
+        </div>
+        <div class="field">
           <label for="cuenta">Iglesia</label>
           <InputText v-model="v$.iglesia.$model" class="!w-full"/>
           <span v-if="v$.iglesia.$dirty && v$.iglesia.$error" class="text-red-600">
@@ -49,13 +56,7 @@
             {{ v$.zona.required.$message }}
           </span>
         </div>
-        <div class="field">
-          <label for="cuenta">Dirección</label>
-          <InputText v-model="v$.direccion.$model" class="!w-full"/>
-          <span v-if="v$.direccion.$dirty && v$.direccion.$error" class="text-red-600">
-            {{ v$.direccion.required.$message }}
-          </span>
-        </div>
+
         <div class="field">
           <label for="cuenta">Pastor</label>
           <InputText v-model="v$.pastor.$model" class="!w-full"/>
@@ -94,6 +95,7 @@ const club = ref({
   direccion: "",
   pastor: "",
 });
+
 const rules = {
   iglesia: {
     required: helpers.withMessage("La iglesia es requerida", required),
@@ -105,19 +107,20 @@ const rules = {
     required: helpers.withMessage("La zona es requerida", required),
   },
   direccion: {
-    required: helpers.withMessage("La dirección es requerida", required),
+    required: helpers.withMessage("El club es requerido", required),
   },
   pastor: {
     required: helpers.withMessage("El pastor es requerido", required),
   },
 };
+
 const v$ = useVuelidate(rules, club);
 
 const columns = [
   {field: 'iglesia', header: 'Iglesia'},
   {field: 'distrito', header: 'Distrito'},
   {field: 'zona', header: 'Zona'},
-  {field: 'direccion', header: 'Dirección'},
+  {field: 'direccion', header: 'Club'},
   {field: 'pastor', header: 'Pastor'},
 ];
 const actions = ref([

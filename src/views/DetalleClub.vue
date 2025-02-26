@@ -47,9 +47,7 @@
         <div class="field">
           <label for="telefono">Teléfono</label>
           <InputMask v-model="v$.telefono.$model" mask="9999-9999" class="!w-full"/>
-          <span v-if="v$.telefono.$dirty && v$.telefono.$error" class="text-red-600">
-        {{ v$.telefono.required.$message }}
-      </span>
+          <errors :errors="v$.telefono.$errors"/>
         </div>
         <div class="field">
           <label for="es_alergico">¿Es alérgico a?</label>
@@ -80,7 +78,7 @@
       </span>
         </div>
       </div>
-      <div>
+      <div class="my-5">
         <h1 class="text-customBlue-700 text-2xl">Información del Responsable</h1>
       </div>
       <div class="p-fluid grid grid-cols-3 gap-4">
@@ -101,9 +99,7 @@
         <div class="field">
           <label for="telefono_responsable">Teléfono</label>
           <InputMask v-model="v$.telefono_responsable.$model" mask="9999-9999" class="!w-full"/>
-          <span v-if="v$.telefono_responsable.$dirty && v$.telefono_responsable.$error" class="text-red-600">
-        {{ v$.telefono_responsable.required.$message }}
-      </span>
+          <errors :errors="v$.telefono_responsable.$errors"/>
         </div>
         <div class="field">
           <label for="parentesco">Parentesco</label>
@@ -137,7 +133,6 @@
 import {ref, onMounted, computed} from "vue";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
-import Calendar from "primevue/calendar";
 import RadioButton from "primevue/radiobutton";
 import InputMask from "primevue/inputmask";
 import InputNumber from "primevue/inputnumber";
@@ -149,6 +144,7 @@ import {helpers, required} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRoute, useRouter} from "vue-router";
+import Errors from "../components/errors.vue";
 
 const router = useRouter();
 const route = useRoute()
@@ -169,7 +165,14 @@ const miembroClub = ref({
   parentesco_responsable: "",
   pago_seguro: false
 });
-
+const phoneStart = (number) => {
+  if (!number){
+    return true;
+  }else {
+    let regex = new RegExp('^[267]');
+    return regex.test(number);
+  }
+}
 const rules = {
   nombres: {
     required: helpers.withMessage("Los nombres son requeridos", required),
@@ -179,6 +182,7 @@ const rules = {
   },
   telefono: {
     required: helpers.withMessage("El teléfono es requerido", required),
+    startsWith: helpers.withMessage("El teléfono debe comenzar con 6, 2 o 7", phoneStart),
   },
   is_alergico_a: {
     required: helpers.withMessage("La información sobre alergias es requerida", required),
@@ -190,7 +194,7 @@ const rules = {
     required: helpers.withMessage("La información sobre medicamentos es requerida", required),
   },
   edad: {
-    required: helpers.withMessage("La fecha de nacimiento es requerida", required),
+    required: helpers.withMessage("La edad es requerida", required),
   },
   nombres_responsable: {
     required: helpers.withMessage("Los nombres del responsable son requeridos", required),
@@ -233,14 +237,18 @@ const addConquis = async () => {
     return;
   }
   try {
+    console.log(route.params.id);
+
     let data = {
       ...miembroClub.value,
-      club_id: route.params.id
+      club_id: parseInt(route.params.id),
     };
-    await axiosInstance.post('/miembros', data);
-    showModal.value = false;
-    await fetchMiembros();
-
+    console.log(data);
+    /**
+     await axiosInstance.post('/miembros', data);
+     showModal.value = false;
+     await fetchMiembros();
+     **/
   } catch (e) {
     console.error(e);
   }
