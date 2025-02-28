@@ -7,7 +7,7 @@ import 'primeicons/primeicons.css';
 import ToastService from "primevue/toastservice";
 import Toast from "primevue/toast";
 import './style.css';
-import 'primevue/resources/themes/lara-light-teal/theme.css'
+import 'primevue/resources/themes/lara-light-teal/theme.css';
 
 const app = createApp(App);
 app.use(router);

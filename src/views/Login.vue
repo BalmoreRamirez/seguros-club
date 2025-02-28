@@ -10,11 +10,13 @@
           </div>
           <div>
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input v-model="password" id="password" type="password" required class="w-full px-3 py-2 border rounded-lg"/>
+            <input v-model="password" id="password" type="password" required
+                   class="w-full px-3 py-2 border rounded-lg"/>
           </div>
         </div>
         <div class="mt-6">
-          <button type="submit" class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg" @click="handleLogin">Login</button>
+          <button type="submit" class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg" @click="handleLogin">Login
+          </button>
         </div>
       </div>
     </div>
@@ -22,9 +24,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
 import axiosInstance from "../axiosConfig.js";
+import {setToken} from "../utils/auth.js";
 
 const username = ref('');
 const password = ref('');
@@ -37,7 +40,7 @@ const handleLogin = async () => {
       password: password.value
     });
     const token = response.data.token;
-    localStorage.setItem('auth', token);
+    setToken(token);
     await router.push('/home');
   } catch (error) {
     alert('Invalid credentials');

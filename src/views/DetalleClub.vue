@@ -166,9 +166,9 @@ const miembroClub = ref({
   pago_seguro: false
 });
 const phoneStart = (number) => {
-  if (!number){
+  if (!number) {
     return true;
-  }else {
+  } else {
     let regex = new RegExp('^[267]');
     return regex.test(number);
   }
@@ -243,12 +243,9 @@ const addConquis = async () => {
       ...miembroClub.value,
       club_id: parseInt(route.params.id),
     };
-    console.log(data);
-    /**
-     await axiosInstance.post('/miembros', data);
-     showModal.value = false;
-     await fetchMiembros();
-     **/
+    await axiosInstance.post('/miembros', data);
+    showModal.value = false;
+    await fetchMiembros();
   } catch (e) {
     console.error(e);
   }

@@ -1,7 +1,5 @@
 import {createRouter, createWebHistory} from 'vue-router';
 const isAuthenticated = () => {
-    // Simulate an authentication check
-    console.log(localStorage.getItem('auth'));
     return localStorage.getItem('auth') !== null;
 };
 const routes = [
@@ -38,10 +36,8 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated()) {
-            console.log('No autenticado');
             next({name: 'Login'});
         } else {
-            console.log('Autenticado');
             next();
         }
     } else {

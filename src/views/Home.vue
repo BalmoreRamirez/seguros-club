@@ -4,10 +4,10 @@
       Lista de clubes
     </h1>
     <div class="flex justify-between w-4/5 mx-auto">
-      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf">
+      <button v-if="estadoButton" class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf">
         PDF
       </button>
-      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="showModal = true">
+      <button v-if="estadoButton" class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="showModal = true">
         Agregar
       </button>
     </div>
@@ -84,10 +84,12 @@ import {helpers, required} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRouter} from "vue-router";
+import {loginId, roleId} from "../utils/auth.js";
 
 const router = useRouter();
 const showModal = ref(false);
 const DataClub = ref([]);
+const estadoButton = ref(false);
 const club = ref({
   iglesia: "",
   distrito: "",
@@ -117,10 +119,10 @@ const rules = {
 const v$ = useVuelidate(rules, club);
 
 const columns = [
+  {field: 'direccion', header: 'Club'},
   {field: 'iglesia', header: 'Iglesia'},
   {field: 'distrito', header: 'Distrito'},
   {field: 'zona', header: 'Zona'},
-  {field: 'direccion', header: 'Club'},
   {field: 'pastor', header: 'Pastor'},
 ];
 const actions = ref([
@@ -135,20 +137,24 @@ const actions = ref([
 ]);
 const fetchClubs = async () => {
   try {
-    const response = await axiosInstance.get('/clubs');
-    console.log(response.data);
-    DataClub.value = response.data;
+    const id_rol = parseInt(localStorage.getItem('roleId'));
+    const id_login = parseInt(localStorage.getItem('loginId'));
+    console.log(id_rol, id_login);
+    const response = await axiosInstance.get(`/clubs/${id_rol}/${id_login}`);
+    DataClub.value = response.data.clubs;
+    estadoButton.value = response.data.estadoButton;
   } catch (e) {
     console.error(e);
   }
-}
+};
 const addClub = async () => {
+  const loginId = parseInt(localStorage.getItem('loginId'));
   if (v$.value.$invalid) {
     v$.value.$touch();
     return;
   }
   try {
-    const response = await axiosInstance.post('/clubs', club.value);
+    const response = await axiosInstance.post('/clubs', {loginId, ...club.value});
     if (response.status === 201) {
       DataClub.value.push(response.data);
       club.value = {
@@ -159,8 +165,9 @@ const addClub = async () => {
         pastor: "",
       };
       showModal.value = false;
+      window.location.reload();
     }
-    console.log('Club agregado');
+
   } catch (e) {
     console.error(e);
   }
