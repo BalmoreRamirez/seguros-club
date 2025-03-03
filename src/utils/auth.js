@@ -1,26 +1,41 @@
 import {jwtDecode} from "jwt-decode";
+import {ref} from "vue";
 
-export let loginId = null;
-export let roleId = null;
+let user_id = ref(null);
+let id_role = ref(null);
+let is_admin = ref(null);
+let complete_club = ref(null);
+
+const token = localStorage.getItem('auth');
+if (token) {
+    const decode = jwtDecode(token);
+    user_id.value = decode.id;
+    id_role.value = decode.id_role;
+    is_admin.value = decode.is_admin;
+    complete_club.value = decode.complete_club;
+}
+
+export {user_id, id_role, is_admin, complete_club};
 
 export const setToken = (token) => {
-  const decode = jwtDecode(token);
-  loginId = decode.id;
-  roleId = decode.roleId;
-  localStorage.setItem('auth', token);
-  localStorage.setItem('loginId', loginId);
-  localStorage.setItem('roleId', roleId);
+    const decode = jwtDecode(token);
+    user_id.value = decode.id;
+    id_role.value = decode.id_role;
+    is_admin.value = decode.is_admin;
+    complete_club.value = decode.complete_club;
+    localStorage.setItem('auth', token);
 };
 
 export const clearToken = () => {
-  loginId = null;
-  roleId = null;
-  localStorage.removeItem('auth');
-  localStorage.removeItem('loginId');
-  localStorage.removeItem('roleId');
+    user_id.value = null;
+    id_role.value = null;
+    is_admin.value = null;
+    complete_club.value = null;
+    localStorage.removeItem('auth');
+
 };
 
 export const logout = (router) => {
-  clearToken();
-  router.push('/');
+    clearToken();
+    router.push('/');
 };

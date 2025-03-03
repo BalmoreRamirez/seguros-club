@@ -1,7 +1,7 @@
 <template>
   <div class="container p-4 space-y-10">
     <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500">
-      Miembros del club - {{ $route.params.id }}
+      Miembros del club - {{ nombre_club }}
     </h1>
     <div class="flex justify-between w-4/5 mx-auto">
       <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf">
@@ -31,17 +31,31 @@
       </div>
       <div class="p-fluid grid grid-cols-3 gap-4">
         <div class="field">
-          <label for="nombres">Nombres</label>
-          <InputText v-model="v$.nombres.$model" class="!w-full"/>
-          <span v-if="v$.nombres.$dirty && v$.nombres.$error" class="text-red-600">
-        {{ v$.nombres.required.$message }}
+          <label for="nombres">Primer nombre</label>
+          <InputText v-model="v$.primer_nombre.$model" class="!w-full"/>
+          <span v-if="v$.primer_nombre.$dirty && v$.primer_nombre.$error" class="text-red-600">
+        {{ v$.primer_nombre.required.$message }}
       </span>
         </div>
         <div class="field">
-          <label for="apellidos">Apellidos</label>
-          <InputText v-model="v$.apellidos.$model" class="!w-full"/>
-          <span v-if="v$.apellidos.$dirty && v$.apellidos.$error" class="text-red-600">
-        {{ v$.apellidos.required.$message }}
+          <label for="nombres">Segundo nombre</label>
+          <InputText v-model="v$.segundo_nombre.$model" class="!w-full"/>
+          <span v-if="v$.segundo_nombre.$dirty && v$.segundo_nombre.$error" class="text-red-600">
+        {{ v$.segundo_nombre.required.$message }}
+      </span>
+        </div>
+        <div class="field">
+          <label for="apellidos">Primer apellido</label>
+          <InputText v-model="v$.primer_apellido.$model" class="!w-full"/>
+          <span v-if="v$.primer_apellido.$dirty && v$.primer_apellido.$error" class="text-red-600">
+        {{ v$.primer_apellido.required.$message }}
+      </span>
+        </div>
+        <div class="field">
+          <label for="apellidos">Segundo apellido</label>
+          <InputText v-model="v$.segundo_apellido.$model" class="!w-full"/>
+          <span v-if="v$.segundo_apellido.$dirty && v$.segundo_apellido.$error" class="text-red-600">
+        {{ v$.segundo_apellido.required.$message }}
       </span>
         </div>
         <div class="field">
@@ -150,10 +164,12 @@ const router = useRouter();
 const route = useRoute()
 const showModal = ref(false);
 const DataClub = ref([]);
-
+const nombre_club = ref("");
 const miembroClub = ref({
-  nombres: "",
-  apellidos: "",
+  primer_nombre: "",
+  segundo_nombre: "",
+  primer_apellido: "",
+  segundo_apellido: "",
   telefono: "",
   is_alergico_a: "",
   enfermedad_padese: "",
@@ -174,10 +190,16 @@ const phoneStart = (number) => {
   }
 }
 const rules = {
-  nombres: {
+  primer_nombre: {
     required: helpers.withMessage("Los nombres son requeridos", required),
   },
-  apellidos: {
+  segundo_nombre: {
+    required: helpers.withMessage("Los nombres son requeridos", required),
+  },
+  primer_apellido: {
+    required: helpers.withMessage("Los apellidos son requeridos", required),
+  },
+  segundo_apellido: {
     required: helpers.withMessage("Los apellidos son requeridos", required),
   },
   telefono: {
@@ -216,7 +238,8 @@ const rules = {
 const v$ = useVuelidate(rules, miembroClub);
 
 const columns = [
-  {field: "nombre", header: "Nombre"},
+  {field: "nombres", header: "Nombre"},
+  {field: "apellidos", header: "Apellido"},
   {field: "edad", header: "Edad"},
   {field: "telefono", header: "Teléfono"}
 ];
@@ -241,7 +264,7 @@ const addConquis = async () => {
 
     let data = {
       ...miembroClub.value,
-      club_id: parseInt(route.params.id),
+      id_club: parseInt(route.params.id),
     };
     await axiosInstance.post('/miembros', data);
     showModal.value = false;
@@ -260,9 +283,19 @@ const fetchMiembros = async () => {
     console.error(e);
   }
 }
+const getClubId = async () => {
+  try {
+    const id = route.params.id;
+    const response = await axiosInstance.get(`/club/${id}`);
+    nombre_club.value = response.data.nombre;
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 onMounted(() => {
   fetchMiembros();
+  getClubId()
 });
 
 const generarPdf = () => {

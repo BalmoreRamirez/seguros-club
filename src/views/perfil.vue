@@ -5,7 +5,7 @@
         class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500"
       >
         Perfil de
-        {{ informacionPersonal.nombre + " " + informacionPersonal.apellido }}
+        {{ informacionPersonal.primer_nombre + " " + informacionPersonal.primer_apellido }}
       </h1>
       <button
         class="px-4 py-2 text-white bg-customBlue-700 rounded-lg"
@@ -20,11 +20,11 @@
     <div class="mx-auto grid grid-cols-4 gap-4">
       <div>
         <h3 class="text-customBlue-700 text-2xl mb-2">Nombres</h3>
-        <p class="text-gray-700">{{ informacionPersonal.nombre }}</p>
+        <p class="text-gray-700">{{ informacionPersonal.primer_nombre }} {{informacionPersonal.segundo_nombre}}</p>
       </div>
       <div>
         <h3 class="text-customBlue-700 text-2xl mb-2">Apellidos</h3>
-        <p class="text-gray-700">{{ informacionPersonal.apellido }}</p>
+        <p class="text-gray-700">{{ informacionPersonal.primer_apellido }} {{informacionPersonal.segundo_apellido}}}</p>
       </div>
       <div>
         <h3 class="text-customBlue-700 text-2xl mb-2">
@@ -40,7 +40,7 @@
       </div>
       <div>
         <h3 class="text-customBlue-700 text-2xl mb-2">Fecha de nacimiento</h3>
-        <p class="text-gray-700">{{ informacionPersonal.fechaNacimiento }}</p>
+        <p class="text-gray-700">{{ informacionPersonal.edad }}</p>
       </div>
     </div>
     <div class="flex justify-start my-10">
@@ -83,11 +83,14 @@ import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
 const informacionPersonal = ref({
-  nombre: "",
+  primer_nombre: "",
+  segundo_nombre: "",
+  primer_apellido: "",
+  segundo_apellido: "",
   apellido: "",
   enfermedad: "",
   medicamento: "",
-  fechaNacimiento: "",
+  edad: "",
 });
 
 const informacionResponsable = ref({
@@ -104,11 +107,14 @@ const fetchMiPerfil = async () => {
     const data = response.data;
 
     informacionPersonal.value = {
-      nombre: data.nombres,
+      primer_nombre: data.primer_nombre,
+      segundo_nombre: data.segundo_nombre,
+      primer_apellido: data.primer_apellido,
+      segundo_apellido: data.segundo_apellido,
       apellido: data.apellidos,
       enfermedad: data.enfermedad_padese,
       medicamento: data.medicamento_receta,
-      fechaNacimiento: new Date(data.fecha_nacimiento).toLocaleDateString(),
+      edad: data.edad,
     };
 
     informacionResponsable.value = {

@@ -4,10 +4,12 @@
       Lista de clubes
     </h1>
     <div class="flex justify-between w-4/5 mx-auto">
-      <button v-if="estadoButton" class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf">
+      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" :disabled="isPdfButtonDisabled"
+              @click="generarPdf">
         PDF
       </button>
-      <button v-if="estadoButton" class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="showModal = true">
+      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg"
+              @click="showModal = true" v-if="is_admin||!complete_club">
         Agregar
       </button>
     </div>
@@ -29,9 +31,9 @@
       <div class="p-fluid grid grid-cols-2 gap-4">
         <div class="field">
           <label for="cuenta">Club</label>
-          <InputText v-model="v$.direccion.$model" class="!w-full"/>
-          <span v-if="v$.direccion.$dirty && v$.direccion.$error" class="text-red-600">
-            {{ v$.direccion.required.$message }}
+          <InputText v-model="v$.nombre.$model" class="!w-full"/>
+          <span v-if="v$.nombre.$dirty && v$.nombre.$error" class="text-red-600">
+            {{ v$.nombre.required.$message }}
           </span>
         </div>
         <div class="field">
@@ -84,7 +86,8 @@ import {helpers, required} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRouter} from "vue-router";
-import {loginId, roleId} from "../utils/auth.js";
+import {is_admin, complete_club, user_id, id_role, logout} from "../utils/auth.js";
+
 
 const router = useRouter();
 const showModal = ref(false);
@@ -94,7 +97,7 @@ const club = ref({
   iglesia: "",
   distrito: "",
   zona: "",
-  direccion: "",
+  nombre: "",
   pastor: "",
 });
 
@@ -108,7 +111,7 @@ const rules = {
   zona: {
     required: helpers.withMessage("La zona es requerida", required),
   },
-  direccion: {
+  nombre: {
     required: helpers.withMessage("El club es requerido", required),
   },
   pastor: {
@@ -119,7 +122,7 @@ const rules = {
 const v$ = useVuelidate(rules, club);
 
 const columns = [
-  {field: 'direccion', header: 'Club'},
+  {field: 'nombre', header: 'Club'},
   {field: 'iglesia', header: 'Iglesia'},
   {field: 'distrito', header: 'Distrito'},
   {field: 'zona', header: 'Zona'},
@@ -135,37 +138,34 @@ const actions = ref([
     },
   }
 ]);
+const isPdfButtonDisabled = computed(() => DataClub.value.length === 0);
 const fetchClubs = async () => {
   try {
-    const id_rol = parseInt(localStorage.getItem('roleId'));
-    const id_login = parseInt(localStorage.getItem('loginId'));
-    console.log(id_rol, id_login);
-    const response = await axiosInstance.get(`/clubs/${id_rol}/${id_login}`);
-    DataClub.value = response.data.clubs;
-    estadoButton.value = response.data.estadoButton;
+
+    const response = await axiosInstance.get(`/clubs/${id_role.value}/${user_id.value}`);
+    DataClub.value = response.data;
   } catch (e) {
     console.error(e);
   }
 };
 const addClub = async () => {
-  const loginId = parseInt(localStorage.getItem('loginId'));
   if (v$.value.$invalid) {
     v$.value.$touch();
     return;
   }
   try {
-    const response = await axiosInstance.post('/clubs', {loginId, ...club.value});
+    const response = await axiosInstance.post('/clubs', {id_usuario: user_id.value, ...club.value});
     if (response.status === 201) {
       DataClub.value.push(response.data);
       club.value = {
         iglesia: "",
         distrito: "",
         zona: "",
-        direccion: "",
+        nombre: "",
         pastor: "",
       };
       showModal.value = false;
-      window.location.reload();
+      logout(router)
     }
 
   } catch (e) {
