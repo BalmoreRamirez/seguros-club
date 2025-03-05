@@ -1,4 +1,6 @@
 import {createRouter, createWebHistory} from 'vue-router';
+import {is_admin} from "../utils/auth.js";
+
 const isAuthenticated = () => {
     return localStorage.getItem('auth') !== null;
 };
@@ -25,6 +27,12 @@ const routes = [
         name: 'Perfil',
         component: () => import('../views/perfil.vue'),
         meta: {requiresAuth: true}
+    },
+    {
+        path: '/clubes/:id',
+        name: 'Clubes',
+        component: () => import('../views/admin/Clubes.vue'),
+        meta: {requiresAuth: true, requiresAdmin: true}
     }
 ];
 
@@ -37,6 +45,14 @@ router.beforeEach((to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (!isAuthenticated()) {
             next({name: 'Login'});
+        } else if (to.matched.some(record => record.meta.requiresAdmin)) {
+
+            if (is_admin.value) {
+                next();
+                console.log('es admin');
+            } else {
+                next({name: 'Home'});
+            }
         } else {
             next();
         }
