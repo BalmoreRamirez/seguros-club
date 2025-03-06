@@ -4,7 +4,8 @@
       Miembros del club - {{ nombre_club }}
     </h1>
     <div class="flex justify-between w-4/5 mx-auto">
-      <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf" :disabled="isPdfButtonDisabled">
+      <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf"
+              :disabled="isPdfButtonDisabled">
         Generar PDF
       </Button>
       <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="showModal = true">
@@ -112,6 +113,7 @@
       </div>
     </Dialog>
   </div>
+  <Toast/>
 </template>
 
 <script setup>
@@ -129,13 +131,38 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRoute, useRouter} from "vue-router";
 import Errors from "../components/errors.vue";
-import {is_admin} from "../utils/auth.js";
+import {useToast} from "primevue/usetoast";
 
+const toast = useToast();
 const router = useRouter();
 const route = useRoute()
 const showModal = ref(false);
 const DataClub = ref([]);
 const nombre_club = ref("");
+const textValidation = (value) => {
+  if (!value) {
+    return true;
+  }else {
+    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
+    return reget.test(value);
+  }
+}
+const medicamentoValidation = (value) => {
+  if (!value) {
+    return true;
+  }else {
+    const reget =  /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,;.\s\-_()]+$/
+    return reget.test(value);
+  }
+}
+const alergiaValidation = (value) => {
+  if (!value) {
+    return true;
+  }else {
+    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,\s]+$/
+    return reget.test(value);
+  }
+}
 const miembroClub = ref({
   primer_nombre: "",
   segundo_nombre: "",
@@ -165,21 +192,25 @@ const rules = {
     required: helpers.withMessage("El primer nombre es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   segundo_nombre: {
     required: helpers.withMessage("El segundo nombre es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   primer_apellido: {
     required: helpers.withMessage("El primer apellido es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   segundo_apellido: {
     required: helpers.withMessage("El segundo apellido es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   telefono: {
     required: helpers.withMessage("El teléfono es requerido", required),
@@ -189,29 +220,36 @@ const rules = {
     required: helpers.withMessage("La información sobre alergias es requerida", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(2)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras y comas", alergiaValidation),
   },
   enfermedad_padese: {
     required: helpers.withMessage("La información sobre enfermedades es requerida", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(2)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   medicamento_receta: {
     required: helpers.withMessage("La información sobre medicamentos es requerida", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(2)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras y ,;.-_()", medicamentoValidation),
   },
   edad: {
     required: helpers.withMessage("La edad es requerida", required),
+    minValue: helpers.withMessage("La edad esta fuera del rango", (value) => value > 0),
+    maxValue: helpers.withMessage("La edad esta fuera del rango", (value) => value < 100),
   },
   nombres_responsable: {
     required: helpers.withMessage("Los nombres del responsable son requeridos", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   apellidos_responsable: {
     required: helpers.withMessage("Los apellidos del responsable son requeridos", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   telefono_responsable: {
     required: helpers.withMessage("El teléfono del responsable es requerido", required),
@@ -220,6 +258,7 @@ const rules = {
     required: helpers.withMessage("El parentesco es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   }
 };
 const isPdfButtonDisabled = computed(() => {
@@ -244,6 +283,10 @@ const actions = ref([
   }
 ]);
 
+/**
+ * Add a new member to the club
+ * @returns {Promise<void>}
+ */
 const addConquis = async () => {
   if (v$.value.$invalid) {
     v$.value.$touch();
@@ -254,29 +297,34 @@ const addConquis = async () => {
       ...miembroClub.value,
       id_club: parseInt(route.params.id),
     };
-    await axiosInstance.post('/miembros', data);
-    showModal.value = false;
-    miembroClub.value = {
-          primer_nombre: "",
-          segundo_nombre: "",
-          primer_apellido: "",
-          segundo_apellido: "",
-          telefono: "",
-          is_alergico_a: "",
-          enfermedad_padese: "",
-          medicamento_receta: "",
-          edad: "",
-          nombres_responsable: "",
-          apellidos_responsable: "",
-          telefono_responsable: "",
-          parentesco_responsable: ""
-        }
-    await fetchMiembros();
+    const response = await axiosInstance.post('/miembros', data);
+    if (response.status === 201) {
+      toast.add({
+        severity: 'success',
+        summary: 'Mensaje de éxito',
+        detail: 'Miembro agregado con éxito',
+        life: 3000
+      });
+      showModal.value = false;
+      limpiarData();
+      await fetchMiembros();
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Mensaje de error',
+        detail: 'No se completo la acción',
+        life: 3000
+      });
+    }
   } catch (e) {
     console.error(e);
   }
 }
 
+/**
+ * Fetch the members of the club
+ * @returns {Promise<void>}
+ */
 const fetchMiembros = async () => {
   try {
     const id = route.params.id;
@@ -286,6 +334,11 @@ const fetchMiembros = async () => {
     console.error(e);
   }
 }
+
+/**
+ * Get the club id
+ * @returns {Promise<void>}
+ */
 const getClubId = async () => {
   try {
     const id = route.params.id;
@@ -301,6 +354,23 @@ const transformedData = computed(() => {
     seguro: member.seguro ? 'pagado' : 'pendiente'
   }));
 });
+const limpiarData = () => {
+  miembroClub.value = {
+    primer_nombre: "",
+    segundo_nombre: "",
+    primer_apellido: "",
+    segundo_apellido: "",
+    telefono: "",
+    is_alergico_a: "",
+    enfermedad_padese: "",
+    medicamento_receta: "",
+    edad: "",
+    nombres_responsable: "",
+    apellidos_responsable: "",
+    telefono_responsable: "",
+    parentesco_responsable: ""
+  }
+}
 onMounted(() => {
   fetchMiembros();
   getClubId()
@@ -329,14 +399,14 @@ const generarPdf = () => {
   doc.text(subtitle, subtitleX, 20);
   doc.text(clubName, clubNameX, 30);
 
-  const newColumns = columns.map(col => ({ header: col.header, field: col.field }));
+  const newColumns = columns.map(col => ({header: col.header, field: col.field}));
 
   const transformedDataForPdf = DataClub.value
-    .filter(member => !member.seguro)
-    .map(member => ({
-      ...member,
-      seguro: 'pendiente'
-    }));
+      .filter(member => !member.seguro)
+      .map(member => ({
+        ...member,
+        seguro: 'pendiente'
+      }));
 
   doc.autoTable({
     head: [newColumns.map(col => col.header)],

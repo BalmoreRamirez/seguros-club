@@ -1,7 +1,7 @@
 <template>
   <div class="container p-4 space-y-10">
     <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500">
-      Lista de clubes
+     {{is_admin?' Lista de clubes':'Mi club'}}
     </h1>
     <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
       <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" v-if="is_admin"
@@ -33,39 +33,34 @@
         <div class="field">
           <label for="cuenta">Club</label>
           <InputText v-model="v$.nombre.$model" class="!w-full"/>
-          <span v-if="v$.nombre.$dirty && v$.nombre.$error" class="text-red-600">
-            {{ v$.nombre.required.$message }}
-          </span>
+          <errors :errors="v$.nombre.$errors"/>
         </div>
         <div class="field">
           <label for="cuenta">Iglesia</label>
           <InputText v-model="v$.iglesia.$model" class="!w-full"/>
-          <span v-if="v$.iglesia.$dirty && v$.iglesia.$error" class="text-red-600">
-            {{ v$.iglesia.required.$message }}
-          </span>
+          <errors :errors="v$.iglesia.$errors"/>
         </div>
         <div class="field">
           <label for="cuenta">Distrito</label>
           <InputText v-model="v$.distrito.$model" class="!w-full"/>
-          <span v-if="v$.distrito.$dirty && v$.distrito.$error" class="text-red-600">
-            {{ v$.distrito.required.$message }}
-          </span>
+          <errors :errors="v$.distrito.$errors"/>
         </div>
 
         <div class="field flex flex-col">
           <label for="cuenta">Zona</label>
           <Dropdown v-model="v$.zona.$model" :options="zonas" optionLabel="nombre" placeholder="Zonas" class="!w-full"/>
-          <span v-if="v$.zona.$dirty && v$.zona.$error" class="text-red-600">
-            {{ v$.zona.required.$message }}
-          </span>
+          <errors :errors="v$.zona.$errors"/>
         </div>
 
         <div class="field">
           <label for="cuenta">Pastor</label>
           <InputText v-model="v$.pastor.$model" class="!w-full"/>
-          <span v-if="v$.pastor.$dirty && v$.pastor.$error" class="text-red-600">
-            {{ v$.pastor.required.$message }}
-          </span>
+          <errors :errors="v$.pastor.$errors"/>
+        </div>
+        <div class="field">
+          <p class="text-yellow-500 italic">
+            Nota: Al agregar la información del club debe de iniciar sesión nuevamente.
+          </p>
         </div>
         <div class="field">
           <Button class="text-white bg-customBlue-700 rounded-lg" label="Agregar" @click="addClub"/>
@@ -89,8 +84,10 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRouter} from "vue-router";
 import {is_admin, complete_club, user_id, id_role, logout} from "../utils/auth.js";
+import Errors from "../components/errors.vue";
+import {useToast} from "primevue/usetoast"
 
-
+const toast = useToast();
 const router = useRouter();
 const showModal = ref(false);
 const DataClub = ref([]);
@@ -121,17 +118,34 @@ const zonas = ref([
     "nombre": "Zona 4"
   }
 ])
-
+const textValidation = (value) => {
+  if (!value) {
+    return true;
+  } else {
+    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
+    return reget.test(value);
+  }
+}
+const textNumberValidation = (value) => {
+  if (!value) {
+    return true;
+  } else {
+    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s1-9]+$/
+    return reget.test(value);
+  }
+}
 const rules = {
   iglesia: {
     required: helpers.withMessage("La iglesia es requerida", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras y números", textNumberValidation),
   },
   distrito: {
     required: helpers.withMessage("El distrito es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras y números", textNumberValidation),
   },
   zona: {
     required: helpers.withMessage("La zona es requerida", required),
@@ -140,11 +154,13 @@ const rules = {
     required: helpers.withMessage("El club es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras y números", textNumberValidation),
   },
   pastor: {
     required: helpers.withMessage("El pastor es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
+    typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
 };
 
@@ -162,9 +178,9 @@ const actions = ref([
     label: "Editar",
     icon: "visibility",
     onClick: (value) => {
-      if (is_admin.value){
+      if (is_admin.value) {
         router.push({name: 'Clubes', params: {id: value.id}});
-      }else{
+      } else {
         router.push({name: 'DetalleClub', params: {id: value.id}});
       }
 
@@ -197,7 +213,13 @@ const addClub = async () => {
     };
     const response = await axiosInstance.post('/clubs', data);
     if (response.status === 201) {
-      DataClub.value.push(response.data);
+      toast.add({
+        severity: 'success',
+        summary: 'Mensaje de éxito',
+        detail: 'Club agregado con éxito',
+        life: 3000
+      });
+      await fetchClubs();
       club.value = {
         iglesia: "",
         distrito: "",
@@ -207,6 +229,13 @@ const addClub = async () => {
       };
       showModal.value = false;
       logout(router)
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Mensaje de error',
+        detail: 'Error al agregar el club',
+        life: 3000
+      });
     }
   } catch (e) {
     console.error(e);
