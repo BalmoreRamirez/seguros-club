@@ -17,7 +17,7 @@
         <span class="text-customBlue-500">Total pagado: {{ totalPagado }}</span>
         <span class="text-customBlue-500">Total pendiente: {{ totalPendiente }}</span>
       </div>
-      <DataTable :data="transformedData" :columns="columns" :haveActions="true">
+      <DataTableMiembros :data="transformedData" :columns="columns" :haveActions="true">
         <template #actions="{data}">
           <div class="flex justify-center items-center">
             <div v-for="(action, index) in actions" :key="index">
@@ -29,7 +29,7 @@
           </div>
         </template>
 
-      </DataTable>
+      </DataTableMiembros>
     </div>
     <Dialog header="Agregar Información" v-model:visible="showModal" :modal="true" :closable="true"
             :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
@@ -123,14 +123,14 @@ import InputText from "primevue/inputtext";
 import InputMask from "primevue/inputmask";
 import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
-import axiosInstance from "../axiosConfig.js";
+import axiosInstance from "../../axiosConfig.js";
 import {useVuelidate} from "@vuelidate/core";
-import DataTable from "../components/DataTable.vue";
+import DataTableMiembros from "../../components/DataTableMiembros.vue";
 import {helpers, required, maxLength, minLength} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRoute, useRouter} from "vue-router";
-import Errors from "../components/errors.vue";
+import Errors from "../../components/errors.vue";
 import {useToast} from "primevue/usetoast";
 
 const toast = useToast();
@@ -269,7 +269,7 @@ const columns = [
   {field: "nombres", header: "Nombres"},
   {field: "apellidos", header: "Apellidos"},
   {field: "edad", header: "Edad"},
-  {field: "seguro", header: "Seguro"},
+
   {field: "telefono", header: "Teléfono"}
 ];
 const actions = ref([
@@ -277,7 +277,6 @@ const actions = ref([
     label: "Editar",
     icon: "visibility",
     onClick: (value) => {
-      console.log(value.id);
       router.push({name: 'Perfil', params: {id: value.id}});
     },
   }

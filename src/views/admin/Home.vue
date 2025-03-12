@@ -1,7 +1,7 @@
 <template>
   <div class="container p-4 space-y-10">
     <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500">
-     {{is_admin?' Lista de clubes':'Mi club'}}
+      {{ is_admin ? ' Lista de clubes' : 'Mi club' }}
     </h1>
     <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
       <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" v-if="is_admin"
@@ -14,18 +14,18 @@
       </button>
     </div>
     <div class="flex flex-col space-y-10 w-full md:w-4/5 mx-auto">
-      <DataTable :data="DataClub" :columns="columns" :haveActions="true">
+      <DataTableClubes :data="DataClub" :columns="columns" :haveActions="true">
         <template #actions="{data}">
           <div class="flex justify-left items-center">
             <div v-for="(action, index) in actions" :key="index">
               <button :key="action.label" type="button" class="bg-transparent rounded-full px-1"
                       @click="() => action.onClick(data)">
-                <i class="pi pi-eye text-customBlue-500"></i>
+                <i :class="action.icon(data)" class="text-customBlue-500"></i>
               </button>
             </div>
           </div>
         </template>
-      </DataTable>
+      </DataTableClubes>
     </div>
     <Dialog header="Agregar Información" v-model:visible="showModal" :modal="true" :closable="true"
             :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
@@ -63,35 +63,39 @@
           </p>
         </div>
         <div class="field">
-          <Button class="text-white bg-customBlue-700 rounded-lg" label="Agregar" @click="addClub"/>
+          <Button class="text-white bg-customBlue-700 rounded-lg" label="Actualizar" @click="updateClub" v-if="opcionActualizar"/>
+          <Button class="text-white bg-customBlue-700 rounded-lg" label="Agregar" @click="agregarClub" v-else/>
         </div>
       </div>
     </Dialog>
   </div>
+  <Toast/>
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from "vue";
-import Dialog from "primevue/dialog";
-import InputText from "primevue/inputtext";
-import Button from "primevue/button";
-import Dropdown from "primevue/dropdown";
-import axiosInstance from "../axiosConfig.js";
+import {computed, onMounted, ref} from "vue";
+import {useRouter} from "vue-router";
+import {useToast} from "primevue/usetoast";
 import {useVuelidate} from "@vuelidate/core";
-import DataTable from "../components/DataTable.vue";
-import {helpers, required, minLength, maxLength} from "@vuelidate/validators";
+import {helpers, maxLength, minLength, required} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import {useRouter} from "vue-router";
-import {is_admin, complete_club, user_id, id_role, logout} from "../utils/auth.js";
-import Errors from "../components/errors.vue";
-import {useToast} from "primevue/usetoast"
+import axiosInstance from "../../axiosConfig.js";
+import Button from "primevue/button";
+import DataTableMiembros from "../../components/DataTableMiembros.vue";
+import Dialog from "primevue/dialog";
+import Dropdown from "primevue/dropdown";
+import Errors from "../../components/errors.vue";
+import InputText from "primevue/inputtext";
+import {complete_club, id_role, is_admin, logout, user_id} from "../../utils/auth.js";
+import DataTableClubes from "../../components/DataTableClubes.vue";
 
 const toast = useToast();
 const router = useRouter();
 const showModal = ref(false);
+const opcionActualizar = ref(false);
+const idClubActualizar = ref(0);
 const DataClub = ref([]);
-const estadoButton = ref(false);
 const club = ref({
   iglesia: "",
   distrito: "",
@@ -163,7 +167,6 @@ const rules = {
     typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
 };
-
 const v$ = useVuelidate(rules, club);
 
 const columns = [
@@ -175,29 +178,96 @@ const columns = [
 ];
 const actions = ref([
   {
-    label: "Editar",
-    icon: "visibility",
+    label: "Ver",
+    icon: ()=> "pi pi-eye",
     onClick: (value) => {
       if (is_admin.value) {
         router.push({name: 'Clubes', params: {id: value.id}});
       } else {
         router.push({name: 'DetalleClub', params: {id: value.id}});
       }
-
+    },
+  },
+  {
+    label: (club) => club.estado ? "Deactivate" : "Activate",
+    icon: (club) => club.estado ? "pi pi-times" : "pi pi-check",
+    onClick: (club) => toggleClubState(club),
+  },
+  {
+    label: 'Editar',
+    icon: () => 'pi pi-pencil',
+    onClick: (value) => {
+      opcionActualizar.value = true;
+      idClubActualizar.value= value.id;
+      club.value = {
+        iglesia: value.iglesia,
+        distrito: value.distrito,
+        zona: zonas.value.find(zona => zona.nombre === value.zona),
+        nombre: value.nombre,
+        pastor: value.pastor,
+      };
+      showModal.value = true;
     },
   }
 ]);
-const isPdfButtonDisabled = computed(() => DataClub.value.length === 0);
-const fetchClubs = async () => {
-  try {
 
+/**
+ * Fetch the clubs
+ * @returns {Promise<void>}
+ */
+const listarClubes = async () => {
+  try {
     const response = await axiosInstance.get(`/clubs/${id_role.value}/${user_id.value}`);
     DataClub.value = response.data;
   } catch (e) {
     console.error(e);
   }
 };
-const addClub = async () => {
+
+const updateClub= async ()=>{
+  try {
+    const data = {
+      id_usuario: user_id.value,
+      iglesia: club.value.iglesia,
+      distrito: club.value.distrito,
+      zona: club.value.zona.nombre,
+      nombre: club.value.nombre,
+      pastor: club.value.pastor,
+    };
+    const response = await axiosInstance.put(`/clubs/${idClubActualizar.value}`, data);
+    if (response.status === 200) {
+      toast.add({
+        severity: 'success',
+        summary: 'Mensaje de éxito',
+        detail: 'Club actualizado con éxito',
+        life: 3000
+      });
+      await listarClubes();
+      club.value = {
+        iglesia: "",
+        distrito: "",
+        zona: "",
+        nombre: "",
+        pastor: "",
+      };
+      showModal.value = false;
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Mensaje de error',
+        detail: 'Error al actualizar el club',
+        life: 3000
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+/**
+ * Add a new club
+ * @returns {Promise<void>}
+ */
+const agregarClub = async () => {
   if (v$.value.$invalid) {
     v$.value.$touch();
     return;
@@ -219,7 +289,7 @@ const addClub = async () => {
         detail: 'Club agregado con éxito',
         life: 3000
       });
-      await fetchClubs();
+      await listarClubes();
       club.value = {
         iglesia: "",
         distrito: "",
@@ -255,9 +325,33 @@ const generarPdf = () => {
   });
   doc.save("lista_de_clubes.pdf");
 }
+
+/**
+ * Delete a club
+ * @returns {Promise<void>}
+ * @param club
+ */
+const toggleClubState = async (club) => {
+  try {
+    const newState = !club.estado;
+    const response = await axiosInstance.put(`/club/${club.id}`);
+    if (response.status === 200) {
+      await listarClubes();
+      toast.add({
+        severity: 'success',
+        summary: 'Success Message',
+        detail: `Club ${newState ? 'activado' : 'desactivado'} con éxito`,
+        life: 3000
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
 onMounted(() => {
-  fetchClubs();
+  listarClubes();
 });
+
 </script>
 
 <style>

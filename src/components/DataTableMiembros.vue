@@ -2,7 +2,7 @@
   <DataTable :value="data" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
              tableStyle="min-width: 50rem">
     <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
-    <Column header="Seguro" v-if="data.seguro">
+    <Column header="Seguro">
       <template #body="{data}" >
         <Tag :value="data.seguro" :severity="data.seguro?'success' : 'warning'">
           {{data.seguro?'Pagado':'Pendiente'}}

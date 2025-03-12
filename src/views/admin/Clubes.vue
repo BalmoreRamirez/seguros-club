@@ -4,15 +4,14 @@
       Miembros del club - {{ club_name }}
     </h1>
     <div class="flex justify-between w-4/5 mx-auto">
-      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf" :disabled="DataClub.length===0"
-      >
-        Generar PDF
+      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf"
+              :disabled="DataClub.length===0">Generar PDF
       </button>
       <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="UpdateSecureState"
-              :disabled="selectedStatusInsurance.length === 0">
-        Pagar seguro
+              :disabled="selectedStatusInsurance.length === 0">Pagar seguro
       </Button>
     </div>
+
     <div class="flex flex-col space-y-10 w-4/5 mx-auto">
       <div class="flex flex-col justify-between">
         <span class="text-customBlue-500">Total pagado: {{ totalPagado }}</span>
@@ -30,34 +29,124 @@
         <Column field="edad" header="Edad"></Column>
         <Column field="seguro" header="Seguro">
           <template #body="slotProps">
-            <span>{{ slotProps.data.seguro ? 'Pagado' : 'Pendiente' }}</span>
+            <Tag :severity="slotProps.data.seguro?'success':'warning'">{{ slotProps.data.seguro ? 'Pagado' : 'Pendiente' }}</Tag>
           </template>
         </Column>
         <Column field="telefono" header="Teléfono"></Column>
+        <Column header="Acciones">
+          <template #body="slotProps">
+            <Button icon="pi pi-pencil" severity="info"  @click="editMember(slotProps.data)"/>
+            <Button icon="pi pi-trash" severity="danger" class="ml-2" @click="deleteMember(slotProps.data)"/>
+          </template>
+        </Column>
       </DataTable>
     </div>
   </div>
   <Toast/>
+  <Dialog v-model:visible="showEditModal" header="Editar Miembro" :modal="true" :closable="true"
+          :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
+    <div class="p-fluid grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="field">
+        <label for="primer_nombre">Primer Nombre</label>
+        <InputText id="primer_nombre" v-model="editMemberData.primer_nombre"/>
+      </div>
+      <div class="field">
+        <label for="segundo_nombre">Segundo Nombre</label>
+        <InputText id="segundo_nombre" v-model="editMemberData.segundo_nombre"/>
+      </div>
+      <div class="field">
+        <label for="primer_apellido">Primer Apellido</label>
+        <InputText id="primer_apellido" v-model="editMemberData.primer_apellido"/>
+      </div>
+      <div class="field">
+        <label for="segundo_apellido">Segundo Apellido</label>
+        <InputText id="segundo_apellido" v-model="editMemberData.segundo_apellido"/>
+      </div>
+      <div class="field">
+        <label for="telefono">Teléfono</label>
+        <InputText id="telefono" v-model="editMemberData.telefono"/>
+      </div>
+      <div class="field">
+        <label for="is_alergico_a">Alergias</label>
+        <InputText id="is_alergico_a" v-model="editMemberData.is_alergico_a"/>
+      </div>
+      <div class="field">
+        <label for="enfermedad_padese">Enfermedades</label>
+        <InputText id="enfermedad_padese" v-model="editMemberData.enfermedad_padese"/>
+      </div>
+      <div class="field">
+        <label for="medicamento_receta">Medicamentos</label>
+        <InputText id="medicamento_receta" v-model="editMemberData.medicamento_receta"/>
+      </div>
+      <div class="field">
+        <label for="edad">Edad</label>
+        <InputText id="edad" v-model="editMemberData.edad"/>
+      </div>
+      <div class="field">
+        <label for="nombres_responsable">Nombres del Responsable</label>
+        <InputText id="nombres_responsable" v-model="editMemberData.nombres_responsable"/>
+      </div>
+      <div class="field">
+        <label for="apellidos_responsable">Apellidos del Responsable</label>
+        <InputText id="apellidos_responsable" v-model="editMemberData.apellidos_responsable"/>
+      </div>
+      <div class="field">
+        <label for="telefono_responsable">Teléfono del Responsable</label>
+        <InputText id="telefono_responsable" v-model="editMemberData.telefono_responsable"/>
+      </div>
+      <div class="field">
+        <label for="parentesco_responsable">Parentesco del Responsable</label>
+        <InputText id="parentesco_responsable" v-model="editMemberData.parentesco_responsable"/>
+      </div>
+    </div>
+    <div class="flex justify-end mt-4 space-x-4">
+      <Button label="Cancelar" severity="info" @click="showEditModal = false"/>
+      <Button label="Guardar" severity="success" @click="updatedMember"/>
+    </div>
+  </Dialog>
 </template>
 
 <script setup>
-import {ref, onMounted, computed} from "vue";
-import DataTable from 'primevue/datatable'
-import Button from "primevue/button";
-import Column from 'primevue/column'
-import Checkbox from 'primevue/checkbox';
+import {computed, onMounted, ref} from "vue";
+import {useRoute, useRouter} from "vue-router";
 import {useToast} from "primevue/usetoast";
-
-const toast = useToast();
-const selectedStatusInsurance = ref([]);
 import axiosInstance from "../../axiosConfig.js";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import {useRoute, useRouter} from "vue-router";
-const route = useRoute()
-const DataClub = ref([]);
+import Button from "primevue/button";
+import Checkbox from "primevue/checkbox";
+import Column from "primevue/column";
+import DataTable from "primevue/datatable";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Tag from "primevue/tag";
+
 const club_name = ref("");
+const DataClub = ref([]);
 const dataIdMiembros = ref([]);
+const editMemberData = ref({
+  primer_nombre: "",
+  segundo_nombre: "",
+  primer_apellido: "",
+  segundo_apellido: "",
+  telefono: "",
+  is_alergico_a: "",
+  enfermedad_padese: "",
+  medicamento_receta: "",
+  edad: "",
+  nombres_responsable: "",
+  apellidos_responsable: "",
+  telefono_responsable: "",
+  parentesco_responsable: "",
+  pago_seguro: false
+});
+const idUpdateMember = ref(0);
+const selectedStatusInsurance = ref([]);
+const showEditModal = ref(false);
+const toast = useToast();
+const route = useRoute();
+const router = useRouter();
+
 const columns = [
   {field: "nombres", header: "Nombres"},
   {field: "apellidos", header: "Apellidos"},
@@ -66,31 +155,21 @@ const columns = [
   {field: "telefono", header: "Teléfono"}
 ];
 
-/**
- * Fetch the members of the selected club
- * @returns {Promise<void>}
- */
 const fetchMiembros = async () => {
   try {
     const id = route.params.id;
     const response = await axiosInstance.get(`/miembros/${id}`);
     DataClub.value = response.data;
     DataClub.value.forEach((item) => {
-      console.log(item.seguro)
-     if (item.seguro){
-
-       selectedStatusInsurance.value.push(item);
-     }
-    })
-    console.log(selectedStatusInsurance.value)
+      if (item.seguro) {
+        selectedStatusInsurance.value.push(item);
+      }
+    });
   } catch (e) {
     console.error(e);
   }
-}
-/**
- * Get the club id
- * @returns {Promise<void>}
- */
+};
+
 const getClubId = async () => {
   try {
     const id = route.params.id;
@@ -99,16 +178,12 @@ const getClubId = async () => {
   } catch (e) {
     console.error(e);
   }
-}
-/**
- * Update the secure state of the selected members
- * @returns {Promise<void>}
- * @constructor
- */
+};
+
 const UpdateSecureState = async () => {
   selectedStatusInsurance.value.forEach((value) => {
     dataIdMiembros.value.push(value.id);
-  })
+  });
   try {
     const id_club = route.params.id;
     const response = await axiosInstance.put('updateMiembros', {
@@ -128,19 +203,79 @@ const UpdateSecureState = async () => {
   } catch (e) {
     console.error(e);
   }
+};
+/**
+ * Editar miembro
+ * @param member
+ * @returns {Promise<void>}
+ */
+const editMember = async (member) => {
+  try {
+    const response = await axiosInstance.get(`/miembro/${member.id}`);
+    const data = response.data;
+    idUpdateMember.value = data.id;
+    editMemberData.value = {
+      primer_nombre: data.primer_nombre,
+      segundo_nombre: data.segundo_nombre,
+      primer_apellido: data.primer_apellido,
+      segundo_apellido: data.segundo_apellido,
+      telefono: data.telefono,
+      is_alergico_a: data.is_alergico_a,
+      enfermedad_padese: data.enfermedad_padese,
+      medicamento_receta: data.medicamento_receta,
+      edad: data.edad,
+      nombres_responsable: data.nombres_responsable,
+      apellidos_responsable: data.apellidos_responsable,
+      telefono_responsable: data.telefono_responsable,
+      parentesco_responsable: data.parentesco_responsable,
+      pago_seguro: data.pago_seguro
+    };
+    showEditModal.value = true;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+/**
+ * Borrar miembro
+ * @param member
+ * @returns {Promise<void>}
+ */
+const deleteMember = async (member) => {
+  try {
+    const response = await axiosInstance.delete(`/miembro/${member.id}`);
+    if (response.status === 200) {
+      toast.add({
+        severity: 'success',
+        summary: 'Mensaje de éxito',
+        detail: 'Miembro eliminado con éxito',
+        life: 3000
+      });
+      await fetchMiembros();
+    }
+  } catch (e) {
+    console.error(e);
+  }
 }
-onMounted(() => {
-  fetchMiembros();
-  getClubId()
-});
 
-const totalPagado = computed(() => {
-  return DataClub.value.filter(member => member.seguro).length;
-});
+const updatedMember = async () => {
+  try {
+    const response = await axiosInstance.put(`/miembro/${idUpdateMember.value}`, editMemberData.value);
+    if (response.status === 200) {
+      toast.add({
+        severity: 'success',
+        summary: 'Mensaje de éxito',
+        detail: 'Miembro actualizado con éxito',
+        life: 3000
+      });
+      showEditModal.value = false;
+      fetchMiembros();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
 
-const totalPendiente = computed(() => {
-  return DataClub.value.filter(member => !member.seguro).length;
-});
 const generarPdf = () => {
   const doc = new jsPDF();
   const title = "ASOCIACION PARACENTRAL SALVADOREÑA";
@@ -176,6 +311,19 @@ const generarPdf = () => {
 
   doc.save(`${clubName}.pdf`);
 };
+
+const totalPagado = computed(() => {
+  return DataClub.value.filter(member => member.seguro).length;
+});
+
+const totalPendiente = computed(() => {
+  return DataClub.value.filter(member => !member.seguro).length;
+});
+
+onMounted(() => {
+  fetchMiembros();
+  getClubId();
+});
 </script>
 
 <style>

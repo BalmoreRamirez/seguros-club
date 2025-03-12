@@ -1,22 +1,27 @@
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold text-center">Inicia sesión</h2>
+      <h2 class="text-2xl font-bold text-center text-customBlue-500">Inicia sesión</h2>
       <div>
-        <div class="space-y-4">
+        <div class="space-y-8">
           <div>
-            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-            <input v-model="username" id="username" type="text" required class="w-full px-3 py-2 border rounded-lg"/>
+            <FloatLabel>
+              <InputText id="username" v-model="username" class="w-full"/>
+              <label for="username">Usuario</label>
+            </FloatLabel>
           </div>
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <input v-model="password" id="password" type="password" required
-                   class="w-full px-3 py-2 border rounded-lg"/>
+            <FloatLabel>
+              <Password v-model="password" toggleMask class="w-full"/>
+              <label for="password">Contraseña</label>
+            </FloatLabel>
           </div>
         </div>
         <div class="mt-6">
-          <button type="submit" class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg" @click="handleLogin">Entrar
-          </button>
+          <Button label="Entrar" icon="pi pi-check" class="w-full" @click="handleLogin"/>
+        </div>
+        <div v-if="errorMessage" class="mt-4 text-red-500 text-center">
+          {{ errorMessage }}
         </div>
       </div>
     </div>
@@ -26,11 +31,16 @@
 <script setup>
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
+import Password from 'primevue/password';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
+import FloatLabel from 'primevue/floatlabel';
 import axiosInstance from "../axiosConfig.js";
-import {setToken} from "../utils/auth.js";
+import {is_admin, setToken} from "../utils/auth.js";
 
 const username = ref('');
 const password = ref('');
+const errorMessage = ref('');
 const router = useRouter();
 
 const handleLogin = async () => {
@@ -41,13 +51,20 @@ const handleLogin = async () => {
     });
     const token = response.data.token;
     setToken(token);
-    await router.push('/home');
+    if (is_admin){
+      await router.push('/HomeAdmin');
+    }else{
+      await router.push('/home');
+    }
   } catch (error) {
-    alert('Invalid credentials');
+    errorMessage.value = error.response.data.message;
   }
 };
 </script>
 
 <style scoped>
-/* Add any additional styling here */
+::v-deep .p-password-input {
+  width: 100% !important;
+}
+
 </style>

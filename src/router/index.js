@@ -13,19 +13,25 @@ const routes = [
     {
         path: '/home',
         name: 'Home',
-        component: () => import('../views/Home.vue'),
+        component: () => import('../views/director/Home.vue'),
         meta: {requiresAuth: true}
+    },
+    {
+        path: '/homeAdmin',
+        name: 'HomeAdmin',
+        component: () => import('../views/admin/Home.vue'),
+        meta: {requiresAuth: true, requiresAdmin: true}
     },
     {
         path: '/detalleClub/:id',
         name: 'DetalleClub',
-        component: () => import('../views/DetalleClub.vue'),
+        component: () => import('../views/director/DetalleClub.vue'),
         meta: {requiresAuth: true}
     },
     {
         path: '/perfil/:id',
         name: 'Perfil',
-        component: () => import('../views/perfil.vue'),
+        component: () => import('../views/director/perfil.vue'),
         meta: {requiresAuth: true}
     },
     {
