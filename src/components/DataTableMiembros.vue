@@ -4,8 +4,8 @@
     <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
     <Column header="Seguro">
       <template #body="{data}" >
-        <Tag :value="data.seguro" :severity="data.seguro?'success' : 'warning'">
-          {{data.seguro?'Pagado':'Pendiente'}}
+        <Tag :value="data.seguro" :severity="data.seguro=='pagado'?'success' : 'warning'">
+          {{data.seguro }}
         </Tag>
       </template>
     </Column>
