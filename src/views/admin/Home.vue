@@ -63,7 +63,8 @@
           </p>
         </div>
         <div class="field">
-          <Button class="text-white bg-customBlue-700 rounded-lg" label="Actualizar" @click="updateClub" v-if="opcionActualizar"/>
+          <Button class="text-white bg-customBlue-700 rounded-lg" label="Actualizar" @click="updateClub"
+                  v-if="opcionActualizar"/>
           <Button class="text-white bg-customBlue-700 rounded-lg" label="Agregar" @click="agregarClub" v-else/>
         </div>
       </div>
@@ -170,7 +171,10 @@ const rules = {
 const v$ = useVuelidate(rules, club);
 
 const columns = [
-  {field: 'nombre', header: 'Club'},
+  {field: 'nombre', header: 'Clubs'},
+  {field: 'miembros', header: 'Miembros'},
+  {field: 'pagados', header: 'Pagados'},
+  {field: 'pendientes', header: 'Pendientes'},
   {field: 'iglesia', header: 'Iglesia'},
   {field: 'distrito', header: 'Distrito'},
   {field: 'zona', header: 'Zona'},
@@ -179,7 +183,7 @@ const columns = [
 const actions = ref([
   {
     label: "Ver",
-    icon: ()=> "pi pi-eye",
+    icon: () => "pi pi-eye",
     onClick: (value) => {
       if (is_admin.value) {
         router.push({name: 'Clubes', params: {id: value.id}});
@@ -198,7 +202,7 @@ const actions = ref([
     icon: () => 'pi pi-pencil',
     onClick: (value) => {
       opcionActualizar.value = true;
-      idClubActualizar.value= value.id;
+      idClubActualizar.value = value.id;
       club.value = {
         iglesia: value.iglesia,
         distrito: value.distrito,
@@ -224,7 +228,7 @@ const listarClubes = async () => {
   }
 };
 
-const updateClub= async ()=>{
+const updateClub = async () => {
   try {
     const data = {
       id_usuario: user_id.value,

@@ -1,6 +1,7 @@
 <template>
     <nav class="bg-customBlue-500 px-4 sm:px-10 flex justify-between items-center text-white py-4">
-      <span><router-link to="/home" class="uppercase">Seguros aps</router-link></span>
+      <span v-if="id_role===1"><router-link to="/homeAdmin" class="uppercase">Seguros aps</router-link></span>
+      <span v-else><router-link to="/home" class="uppercase">Seguros aps</router-link></span>
       <div v-if="isLoggedIn" class="text-center sm:text-left">Bienvenido, <span class="mx-2 text-orange-400">{{ mensaje }}</span></div>
       <Button type="button" icon="pi pi-user" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu" v-if="isLoggedIn"/>
       <Menu ref="menu" id="overlay_menu" :model="items" :popup="true"/>
