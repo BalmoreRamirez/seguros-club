@@ -1,5 +1,5 @@
 <template>
-  <DataTable :value="data" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
+  <DataTable :value="data" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"
              tableStyle="min-width: 50rem">
     <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
     <Column header="Estado">

@@ -8,7 +8,7 @@
               :disabled="DataClub.length===0">Generar PDF
       </button>
       <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="UpdateSecureState"
-              :disabled="selectedStatusInsurance.length === 0">Pagar seguro
+              :disabled="selectedStatusInsurance.length === 0 || allInsurancesPaid">Pagar seguro
       </Button>
     </div>
 
@@ -17,7 +17,8 @@
         <span class="text-customBlue-500">Total pagado: {{ totalPagado }}</span>
         <span class="text-customBlue-500">Total pendiente: {{ totalPendiente }}</span>
       </div>
-      <DataTable v-model:selection="selectedStatusInsurance" :value="DataClub" dataKey="id"
+      <DataTable v-model:selection="selectedStatusInsurance" :value="DataClub" dataKey="id" paginator :rows="10"
+                 :rowsPerPageOptions="[5, 10, 20, 50]"
                  tableStyle="min-width: 50rem">
         <Column selectionMode="multiple" headerStyle="width: 3rem" class="bg-gray-200">
           <template #body="slotProps">
@@ -29,13 +30,16 @@
         <Column field="edad" header="Edad"></Column>
         <Column field="seguro" header="Seguro">
           <template #body="slotProps">
-            <Tag :severity="slotProps.data.seguro?'success':'warning'">{{ slotProps.data.seguro ? 'Pagado' : 'Pendiente' }}</Tag>
+            <Tag :severity="slotProps.data.seguro?'success':'warning'">{{
+                slotProps.data.seguro ? 'Pagado' : 'Pendiente'
+              }}
+            </Tag>
           </template>
         </Column>
         <Column field="telefono" header="Teléfono"></Column>
         <Column header="Acciones">
           <template #body="slotProps">
-            <Button icon="pi pi-pencil" severity="info"  @click="editMember(slotProps.data)"/>
+            <Button icon="pi pi-pencil" severity="info" @click="editMember(slotProps.data)"/>
             <Button icon="pi pi-trash" severity="danger" class="ml-2" @click="deleteMember(slotProps.data)"/>
           </template>
         </Column>
@@ -181,9 +185,28 @@ const getClubId = async () => {
 };
 
 const UpdateSecureState = async () => {
+  if (selectedStatusInsurance.value.length === 0 || !selectedStatusInsurance.value.some(item => !item.seguro)) {
+    toast.add({
+      severity: 'error',
+      summary: 'Mensaje de error',
+      detail: 'Seleccione al menos un miembro con seguro pendiente',
+      life: 3000
+    });
+    return;
+  }
+
   selectedStatusInsurance.value.forEach((value) => {
     dataIdMiembros.value.push(value.id);
   });
+  if (selectedStatusInsurance.value.length === 0) {
+    toast.add({
+      severity: 'error',
+      summary: 'Mensaje de error',
+      detail: 'Seleccione al menos un miembro',
+      life: 3000
+    });
+    return;
+  }
   try {
     const id_club = route.params.id;
     const response = await axiosInstance.put('updateMiembros', {
@@ -320,6 +343,9 @@ const totalPendiente = computed(() => {
   return DataClub.value.filter(member => !member.seguro).length;
 });
 
+const allInsurancesPaid = computed(() => {
+  return DataClub.value.every(member => member.seguro);
+});
 onMounted(() => {
   fetchMiembros();
   getClubId();

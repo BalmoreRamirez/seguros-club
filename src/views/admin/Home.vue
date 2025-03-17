@@ -4,14 +4,11 @@
       {{ is_admin ? ' Lista de clubes' : 'Mi club' }}
     </h1>
     <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
-      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" v-if="is_admin"
+      <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" v-if="is_admin"
               @click="generarPdf">
         Exportar a pdf
-      </button>
-      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg"
-              @click="showModal = true" v-if="!complete_club && !is_admin">
-        Agregar
-      </button>
+      </Button>
+      <Button label="Reporte general" severity="info" @click="reporteGeneral" v-if="is_admin"></Button>
     </div>
     <div class="flex flex-col space-y-10 w-full md:w-4/5 mx-auto">
       <DataTableClubes :data="DataClub" :columns="columns" :haveActions="true">
@@ -329,6 +326,56 @@ const generarPdf = () => {
   });
   doc.save("lista_de_clubes.pdf");
 }
+
+const reporteGeneral = async () => {
+  try {
+    const response = await axiosInstance.get('/reporte-general');
+    const data = response.data;
+
+    const doc = new jsPDF();
+    const title = "Reporte General de Clubes";
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const titleWidth = doc.getTextWidth(title);
+    const titleX = (pageWidth - titleWidth) / 2;
+
+    doc.text(title, titleX, 10);
+
+    let startY = 20;
+
+    data.forEach((club) => {
+      const clubName = `Club: ${club.club}`;
+      doc.text(clubName, 14, startY);
+      startY += 10;
+
+      const members = club.miembros.map(member => [
+        member.primer_nombre,
+        member.segundo_nombre,
+        member.primer_apellido,
+        member.segundo_apellido,
+        member.pago_seguro ? 'Pagado' : 'Pendiente'
+      ]);
+
+      doc.autoTable({
+        head: [['Primer Nombre', 'Segundo Nombre', 'Primer Apellido', 'Segundo Apellido', 'Pago Seguro']],
+        body: members,
+        startY: startY
+      });
+
+      startY = doc.autoTable.previous.finalY + 10;
+    });
+
+    doc.save('reporte_general.pdf');
+  } catch (error) {
+    toast.add(
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error al generar el reporte general',
+        life: 3000
+      }
+    )
+  }
+};
 
 /**
  * Delete a club
