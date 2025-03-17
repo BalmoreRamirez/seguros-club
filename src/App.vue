@@ -43,6 +43,8 @@
     logout(router);
     id_role.value = 0;
     mensaje.value = "";
+    localStorage.removeItem('user_id'); // Clear user_id from localStorage
+    localStorage.removeItem('id_role'); // Clear id_role from localStorage
   };
 
   const toggle = (event) => {
