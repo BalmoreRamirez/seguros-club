@@ -18,7 +18,10 @@
           </div>
         </div>
         <div class="mt-6">
-          <Button label="Entrar" icon="pi pi-check" class="w-full" @click="handleLogin"/>
+          <Button label="Entrar" icon="pi pi-check" class="w-full" @click="handleLogin" :disabled="loading"/>
+        </div>
+        <div v-if="loading" class="mt-4 text-blue-500 text-center">
+          Iniciando sesión...
         </div>
         <div v-if="errorMessage" class="mt-4 text-red-500 text-center">
           {{ errorMessage }}
@@ -41,9 +44,12 @@ import {is_admin, setToken} from "../utils/auth.js";
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
+const loading = ref(false);
 const router = useRouter();
 
 const handleLogin = async () => {
+  loading.value = true;
+  errorMessage.value = '';
   try {
     const response = await axiosInstance.post('/login', {
       user: username.value,
@@ -56,8 +62,11 @@ const handleLogin = async () => {
     }else{
       await router.push('/home');
     }
-  } catch (error) {
+  }
+  catch (error) {
     errorMessage.value = error.response.data.message;
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -66,5 +75,4 @@ const handleLogin = async () => {
 ::v-deep .p-password-input {
   width: 100% !important;
 }
-
 </style>
