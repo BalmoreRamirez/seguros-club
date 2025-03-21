@@ -1,23 +1,26 @@
 <template>
-  <DataTable :value="data" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"
-             tableStyle="min-width: 50rem">
-    <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
-    <Column header="Seguro">
-      <template #body="{data}" >
-        <Tag :value="data.seguro" :severity="data.seguro=='pagado'?'success' : 'warning'">
-          {{data.seguro }}
-        </Tag>
-      </template>
-    </Column>
-    <Column v-if="haveActions">
-      <template #header>
-        <span>Acciones</span>
-      </template>
-      <template #body="{data}">
-        <slot name="actions" :data="data"></slot>
-      </template>
-    </Column>
-  </DataTable>
+  <div  class="bg-customWhite-500 p-3 rounded-md shadow-md">
+    <DataTable :value="data" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"
+               tableStyle="min-width: 50rem">
+      <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
+      <Column header="Seguro">
+        <template #body="{data}" >
+          <Tag :value="data.seguro" :severity="data.seguro=='pagado'?'success' : 'warning'">
+            {{data.seguro }}
+          </Tag>
+        </template>
+      </Column>
+      <Column v-if="haveActions">
+        <template #header>
+          <span>Acciones</span>
+        </template>
+        <template #body="{data}">
+          <slot name="actions" :data="data"></slot>
+        </template>
+      </Column>
+    </DataTable>
+  </div>
+
 </template>
 
 <script setup>
@@ -45,7 +48,7 @@ const props = defineProps({
 <style scoped>
 
 ::v-deep .p-datatable-thead > tr > th {
-  background-color: #172554;
-  color: white;
+  background-color: #FFFFFF;
+  color: #334155;
 }
 </style>

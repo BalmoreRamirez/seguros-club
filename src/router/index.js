@@ -55,7 +55,6 @@ router.beforeEach((to, from, next) => {
 
             if (is_admin.value) {
                 next();
-                console.log('es admin');
             } else {
                 next({name: 'Home'});
             }

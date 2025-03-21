@@ -1,15 +1,16 @@
 <template>
   <div class="container p-4 space-y-10">
-    <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500">
+    <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
       {{ is_admin ? ' Lista de clubes' : 'Mi club' }}
     </h1>
-    <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
-      <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" v-if="is_admin"
-              @click="generarPdf">
-        Exportar a pdf
-      </Button>
-      <Button label="Reporte general" severity="info" @click="reporteGeneral" v-if="is_admin"></Button>
-    </div>
+<div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
+  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" v-if="is_admin" @click="generarPdf">
+    <i class="pi pi-file-pdf mr-2"></i> Exportar a PDF
+  </Button>
+  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" v-if="is_admin" @click="reporteGeneral">
+    <i class="pi pi-chart-bar mr-2"></i> Reporte General
+  </Button>
+</div>
     <div class="flex flex-col space-y-10 w-full md:w-4/5 mx-auto">
       <DataTableClubes :data="DataClub" :columns="columns" :haveActions="true">
         <template #actions="{data}">
@@ -17,7 +18,7 @@
             <div v-for="(action, index) in actions" :key="index">
               <button :key="action.label" type="button" class="bg-transparent rounded-full px-1"
                       @click="() => action.onClick(data)">
-                <i :class="action.icon(data)" class="text-customBlue-500"></i>
+                <i :class="action.icon(data)" class="text-customBlue-700"></i>
               </button>
             </div>
           </div>
@@ -367,12 +368,12 @@ const reporteGeneral = async () => {
     doc.save('reporte_general.pdf');
   } catch (error) {
     toast.add(
-      {
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Error al generar el reporte general',
-        life: 3000
-      }
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Error al generar el reporte general',
+          life: 3000
+        }
     )
   }
 };

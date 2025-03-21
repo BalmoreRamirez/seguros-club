@@ -1,8 +1,12 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold text-center text-customBlue-500">Inicia sesión</h2>
-      <div>
+  <div class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md p-8 space-y-6  rounded-lg">
+
+      <h2 class="text-2xl font-medium text-center text-customBlack-500">¡Bienvenido de nuevo!</h2>
+      <p class="text-customBlack-300 text-center">
+        Ingresa tus credenciales para acceder a la plataforma.
+      </p>
+      <div class="bg-[#ffffff] p-10 rounded-md">
         <div class="space-y-8">
           <div>
             <FloatLabel>
@@ -18,7 +22,7 @@
           </div>
         </div>
         <div class="mt-6">
-          <Button label="Entrar" icon="pi pi-check" class="w-full" @click="handleLogin" :disabled="loading"/>
+          <Button label="Entrar" icon="pi pi-check" class="w-full bg-customBlue-700" @click="handleLogin" :disabled="loading"/>
         </div>
         <div v-if="loading" class="mt-4 text-blue-500 text-center">
           Iniciando sesión...

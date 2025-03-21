@@ -1,17 +1,16 @@
 <template>
   <div class="container p-4 space-y-10">
-    <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500">
+    <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
       Miembros del club - {{ nombre_club }}
     </h1>
-    <div class="flex justify-between w-4/5 mx-auto">
-      <Button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="generarPdf"
-              :disabled="isPdfButtonDisabled">
-        Generar PDF
-      </Button>
-      <button class="px-4 py-2 text-white bg-customBlue-700 rounded-lg" @click="showModal = true">
-        Agregar miembro
-      </button>
-    </div>
+<div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
+  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" @click="generarPdf" :disabled="isPdfButtonDisabled">
+    <i class="pi pi-file-pdf mr-2"></i> Generar PDF
+  </Button>
+  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" @click="showModal = true">
+    <i class="pi pi-user-plus mr-2"></i> Agregar miembro
+  </Button>
+</div>
     <div class="flex flex-col space-y-10 w-4/5 mx-auto">
       <div class="flex flex-col justify-between">
         <span class="text-customBlue-500">Total pagado: {{ totalPagado }}</span>
@@ -109,7 +108,7 @@
         </div>
       </div>
       <div class="my-5 flex">
-        <Button class="text-white bg-customBlue-700 rounded-lg" label="Agregar" @click="addConquis"/>
+        <Button class="text-white bg-customBlue-700 rounded-lg" icon="pi pi-user-plus" label="Agregar" @click="addConquis"/>
       </div>
     </Dialog>
   </div>

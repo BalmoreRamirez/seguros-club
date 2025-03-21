@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto p-4">
     <div class="flex flex-col md:flex-row justify-between my-10">
-      <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlue-500">
+      <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
         Perfil de
         {{ informacionPersonal.primer_nombre + " " + informacionPersonal.primer_apellido }}
       </h1>
@@ -14,27 +14,27 @@
       </button>
     </div>
     <div class="my-10">
-      <h1 class="text-customBlue-700 text-3xl mb-5">Información Personal</h1>
+      <h1 class="text-customBlack-500 text-3xl mb-5">Información Personal</h1>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-200 px-4 py-4 rounded-lg">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-blue-100 px-4 py-4 rounded-lg">
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Nombres</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Nombres</h3>
         <p class="text-gray-700">{{ informacionPersonal.primer_nombre || '-' }} {{ informacionPersonal.segundo_nombre || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Apellidos</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Apellidos</h3>
         <p class="text-gray-700">{{ informacionPersonal.primer_apellido || '-' }} {{ informacionPersonal.segundo_apellido || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">¿Padece alguna enfermedad?</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">¿Padece alguna enfermedad?</h3>
         <p class="text-gray-700">{{ informacionPersonal.enfermedad || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">¿Medicamento con receta?</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">¿Medicamento con receta?</h3>
         <p class="text-gray-700">{{ informacionPersonal.medicamento || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Edad</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Edad</h3>
         <p class="text-gray-700">{{ informacionPersonal.edad || '-' }}</p>
       </div>
       <div class="flex flex-wrap gap-3 bg-gray-300 p-2 rounded-lg">
@@ -45,23 +45,23 @@
       </div>
     </div>
     <div class="my-10">
-      <h1 class="text-customBlue-700 text-3xl mb-5">Información del Responsable</h1>
+      <h1 class="text-customBlack-500 text-3xl mb-5">Información del Responsable</h1>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-200 px-4 py-4 rounded-lg">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-blue-100 px-4 py-4 rounded-lg">
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Nombres</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Nombres</h3>
         <p class="text-gray-700">{{ informacionResponsable.nombresReponsable || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Apellidos</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Apellidos</h3>
         <p class="text-gray-700">{{ informacionResponsable.apellidosReponsable || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Teléfono</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Teléfono</h3>
         <p class="text-gray-700">{{ informacionResponsable.telefono || '-' }}</p>
       </div>
       <div>
-        <h3 class="text-customBlue-700 text-2xl mb-2">Parentesco</h3>
+        <h3 class="text-customBlack-500 text-2xl mb-2">Parentesco</h3>
         <p class="text-gray-700">{{ informacionResponsable.parentesco || '-' }}</p>
       </div>
     </div>
