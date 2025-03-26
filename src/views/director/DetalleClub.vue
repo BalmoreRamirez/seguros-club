@@ -205,7 +205,6 @@ const rules = {
     typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
   segundo_apellido: {
-    required: helpers.withMessage("El segundo apellido es requerido", required),
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
     typeText: helpers.withMessage("Solo se permiten letras", textValidation),
