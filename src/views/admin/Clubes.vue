@@ -30,10 +30,10 @@
               <Checkbox v-model="selectedStatusInsurance" :value="slotProps.data" :disabled="slotProps.data.seguro"/>
             </template>
           </Column>
-          <Column field="nombres" header="Nombres"></Column>
-          <Column field="apellidos" header="Apellidos"></Column>
-          <Column field="edad" header="Edad"></Column>
-          <Column field="seguro" header="Seguro">
+          <Column field="nombres" header="Nombres" sortable></Column>
+          <Column field="apellidos" header="Apellidos" sortable></Column>
+          <Column field="edad" header="Edad" sortable></Column>
+          <Column field="seguro" header="Seguro" sortable>
             <template #body="slotProps">
               <Tag :severity="slotProps.data.seguro?'success':'warning'">{{
                   slotProps.data.seguro ? 'Pagado' : 'Pendiente'
@@ -41,7 +41,7 @@
               </Tag>
             </template>
           </Column>
-          <Column field="telefono" header="Teléfono"></Column>
+          <Column field="telefono" header="Teléfono" sortable></Column>
           <Column header="Acciones">
             <template #body="slotProps">
               <Button icon="pi pi-pencil" severity="info" @click="editMember(slotProps.data)"/>
