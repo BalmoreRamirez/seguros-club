@@ -8,37 +8,50 @@ const routes = [
     {
         path: '/',
         name: 'Login',
-        component: () => import('../views/Login.vue')
+        component: () => import('../views/modules/Auth/Login.vue')
     },
     {
         path: '/home',
         name: 'Home',
-        component: () => import('../views/director/Home.vue'),
+        component: () => import('../views/modules/manager/pages/InfoClubPage.vue'),
         meta: {requiresAuth: true}
     },
     {
-        path: '/homeAdmin',
-        name: 'HomeAdmin',
-        component: () => import('../views/admin/Home.vue'),
+        path: '/listClubes',
+        name: 'ListClubes',
+        component: () => import('../views/modules/administrator/pages/ListClubesPage.vue'),
         meta: {requiresAuth: true, requiresAdmin: true}
     },
     {
         path: '/detalleClub/:id',
         name: 'DetalleClub',
-        component: () => import('../views/director/DetalleClub.vue'),
+        component: () => import('../views/modules/manager/pages/MembersClubPage.vue'),
         meta: {requiresAuth: true}
     },
     {
         path: '/perfil/:id',
         name: 'Perfil',
-        component: () => import('../views/director/perfil.vue'),
+        component: () => import('../views/modules/manager/pages/PerfilUserPage.vue'),
         meta: {requiresAuth: true}
     },
     {
         path: '/clubes/:id',
         name: 'Clubes',
-        component: () => import('../views/admin/Clubes.vue'),
+        component: () => import('../views/modules/administrator/pages/MembersClubPage.vue'),
         meta: {requiresAuth: true, requiresAdmin: true}
+    },
+    {
+        path:'/homeadmin',
+        name: 'HomeAdmin',
+        component: () => import('../views/modules/administrator/pages/HomePage.vue'),
+        meta: {requiresAuth: true, requiresAdmin: true}
+    }
+    ,
+    {
+        path: '/homemanager',
+        name: 'HomeManager',
+        component: () => import('../views/modules/manager/pages/HomePage.vue'),
+        meta: {requiresAuth: true}
     }
 ];
 

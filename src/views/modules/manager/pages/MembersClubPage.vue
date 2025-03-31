@@ -1,22 +1,26 @@
 <template>
-  <div class="container p-4 space-y-10">
+  <div class=" space-y-10">
     <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
       Miembros del club - {{ nombre_club }}
     </h1>
-<div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
-  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" @click="generarPdf" :disabled="isPdfButtonDisabled">
-    <i class="pi pi-file-pdf mr-2"></i> Generar PDF
-  </Button>
-  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" @click="showModal = true">
-    <i class="pi pi-user-plus mr-2"></i> Agregar miembro
-  </Button>
-</div>
-    <div class="flex flex-col space-y-10 w-4/5 mx-auto">
+    <div class="flex flex-col md:flex-row justify-between w-full  mx-auto space-y-4 md:space-y-0">
+      <Button
+          class="bg-customBlue-700 text-white"
+          @click="generarPdf" :disabled="isPdfButtonDisabled">
+        <i class="pi pi-file-pdf mr-2"></i> Generar PDF
+      </Button>
+      <Button
+          class="bg-customBlue-700 text-white"
+          @click="showModal = true">
+        <i class="pi pi-user-plus mr-2"></i> Agregar miembro
+      </Button>
+    </div>
+    <div class="flex flex-col space-y-10  mx-auto">
       <div class="flex flex-col justify-between">
         <span class="text-customBlue-500">Total pagado: {{ totalPagado }}</span>
         <span class="text-customBlue-500">Total pendiente: {{ totalPendiente }}</span>
       </div>
-      <DataTableMiembros :data="transformedData" :columns="columns" :haveActions="true">
+      <DataTableMembersComponent :data="transformedData" :columns="columns" :haveActions="true">
         <template #actions="{data}">
           <div class="flex justify-center items-center">
             <div v-for="(action, index) in actions" :key="index">
@@ -28,7 +32,7 @@
           </div>
         </template>
 
-      </DataTableMiembros>
+      </DataTableMembersComponent>
     </div>
     <Dialog header="Agregar Información" v-model:visible="showModal" :modal="true" :closable="true"
             :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
@@ -108,7 +112,8 @@
         </div>
       </div>
       <div class="my-5 flex">
-        <Button class="text-white bg-customBlue-700 rounded-lg" icon="pi pi-user-plus" label="Agregar" @click="addConquis"/>
+        <Button class="text-white bg-customBlue-700 rounded-lg" icon="pi pi-user-plus" label="Agregar"
+                @click="addConquis"/>
       </div>
     </Dialog>
   </div>
@@ -122,14 +127,14 @@ import InputText from "primevue/inputtext";
 import InputMask from "primevue/inputmask";
 import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
-import axiosInstance from "../../axiosConfig.js";
+import axiosInstance from "../../../../axiosConfig.js";
 import {useVuelidate} from "@vuelidate/core";
-import DataTableMiembros from "../../components/DataTableMiembros.vue";
+import DataTableMembersComponent from "../components/DataTableMembersComponent.vue";
 import {helpers, required, maxLength, minLength} from "@vuelidate/validators";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {useRoute, useRouter} from "vue-router";
-import Errors from "../../components/errors.vue";
+import Errors from "../../../../components/errors.vue";
 import {useToast} from "primevue/usetoast";
 
 const toast = useToast();
@@ -141,7 +146,7 @@ const nombre_club = ref("");
 const textValidation = (value) => {
   if (!value) {
     return true;
-  }else {
+  } else {
     const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
     return reget.test(value);
   }
@@ -149,15 +154,15 @@ const textValidation = (value) => {
 const medicamentoValidation = (value) => {
   if (!value) {
     return true;
-  }else {
-    const reget =  /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,;.\s\-_()]+$/
+  } else {
+    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,;.\s\-_()]+$/
     return reget.test(value);
   }
 }
 const alergiaValidation = (value) => {
   if (!value) {
     return true;
-  }else {
+  } else {
     const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,\s]+$/
     return reget.test(value);
   }

@@ -71,10 +71,10 @@
 import { ref, onMounted } from "vue";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import axiosInstance from "../../axiosConfig.js";
+import axiosInstance from "../../../../axiosConfig.js";
 import { useRoute, useRouter } from "vue-router";
 import InputSwitch from 'primevue/inputswitch';
-import { is_admin } from "../../utils/auth.js";
+import { is_admin } from "../../../../utils/auth.js";
 
 const route = useRoute();
 const router = useRouter();

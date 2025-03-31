@@ -1,56 +1,55 @@
 <template>
-  <div class="container p-4 space-y-10">
+  <div class="space-y-10">
     <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
       Miembros del club - {{ club_name }}
     </h1>
-    <div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
+    <div class="flex flex-col md:flex-row justify-between w-full  mx-auto space-y-4 md:space-y-0">
       <Button
-          class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto"
+          class="bg-customBlue-700 text-white"
           @click="generarPdf" :disabled="DataClub.length === 0">
         <i class="pi pi-file-pdf mr-2"></i> Generar PDF
       </Button>
       <Button
-          class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto"
+          class="bg-customBlue-700 text-white"
           @click="UpdateSecureState" :disabled="selectedStatusInsurance.length === 0 || allInsurancesPaid">
         <i class="pi pi-dollar mr-2"></i> Pagar seguro
       </Button>
     </div>
 
-    <div class="flex flex-col space-y-10 w-4/5 mx-auto">
+    <div class="flex flex-col space-y-10 mx-auto">
       <div class="flex flex-col justify-between">
         <span class="text-customBlack-300">Total pagado: {{ totalPagado }}</span>
         <span class="text-customBlack-300">Total pendiente: {{ totalPendiente }}</span>
       </div>
-      <div class="bg-customWhite-500 p-3 rounded-md shadow-md">
-        <DataTable v-model:selection="selectedStatusInsurance" :value="DataClub" dataKey="id" paginator :rows="10"
-                   :rowsPerPageOptions="[5, 10, 20, 50]"
-                   tableStyle="min-width: 50rem">
-          <Column selectionMode="multiple" headerStyle="width: 3rem" class="bg-gray-200">
-            <template #body="slotProps">
-              <Checkbox v-model="selectedStatusInsurance" :value="slotProps.data" :disabled="slotProps.data.seguro"/>
-            </template>
-          </Column>
-          <Column field="nombres" header="Nombres" sortable></Column>
-          <Column field="apellidos" header="Apellidos" sortable></Column>
-          <Column field="edad" header="Edad" sortable></Column>
-          <Column field="seguro" header="Seguro" sortable>
-            <template #body="slotProps">
-              <Tag :severity="slotProps.data.seguro?'success':'warning'">{{
-                  slotProps.data.seguro ? 'Pagado' : 'Pendiente'
-                }}
-              </Tag>
-            </template>
-          </Column>
-          <Column field="telefono" header="Teléfono" sortable></Column>
-          <Column header="Acciones">
-            <template #body="slotProps">
-              <Button icon="pi pi-pencil" severity="info" @click="editMember(slotProps.data)"/>
-              <Button icon="pi pi-trash" severity="danger" class="ml-2" @click="deleteMember(slotProps.data)"/>
-            </template>
-          </Column>
-        </DataTable>
-      </div>
     </div>
+    <div class="card">
+      <DataTable v-model:selection="selectedStatusInsurance" :value="DataClub" dataKey="id" paginator :rows="10"
+                 :rowsPerPageOptions="[5, 10, 20, 50]"
+                 tableStyle="min-width: 50rem">
+        <Column selectionMode="multiple" headerStyle="width: 3rem" class="bg-gray-200">
+          <template #body="slotProps">
+            <Checkbox v-model="selectedStatusInsurance" :value="slotProps.data" :disabled="slotProps.data.seguro"/>
+          </template>
+        </Column>
+        <Column field="nombres" header="Nombres" sortable></Column>
+        <Column field="apellidos" header="Apellidos" sortable></Column>
+        <Column field="edad" header="Edad" sortable></Column>
+        <Column field="seguro" header="Seguro" sortable>
+          <template #body="slotProps">
+            <Tag :severity="slotProps.data.seguro?'success':'warning'"
+                 :value="slotProps.data.seguro ? 'Pagado' : 'Pendiente'"/>
+          </template>
+        </Column>
+        <Column field="telefono" header="Teléfono" sortable></Column>
+        <Column header="Acciones">
+          <template #body="slotProps">
+            <i class="pi pi-pencil text-customBlue-700 px-1 cursor-pointer" @click="editMember(slotProps.data)"></i>
+            <i class="pi pi-trash text-customBlue-700 px-1 cursor-pointer" @click="deleteMember(slotProps.data)"></i>
+          </template>
+        </Column>
+      </DataTable >
+    </div>
+
   </div>
   <Toast/>
   <Dialog v-model:visible="showEditModal" header="Editar Miembro" :modal="true" :closable="true"
@@ -110,7 +109,7 @@
       </div>
     </div>
     <div class="flex justify-end mt-4 space-x-4">
-      <Button label="Cancelar" icon="pi pi-times" severity="info"  variant="outlined" @click="showEditModal = false"/>
+      <Button label="Cancelar" icon="pi pi-times" severity="info" variant="outlined" @click="showEditModal = false"/>
       <Button label="Guardar" icon="pi pi-check" severity="success" @click="updatedMember"/>
     </div>
   </Dialog>
@@ -120,7 +119,7 @@
 import {computed, onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import {useToast} from "primevue/usetoast";
-import axiosInstance from "../../axiosConfig.js";
+import axiosInstance from "../../../../axiosConfig.js";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import Button from "primevue/button";
