@@ -1,34 +1,38 @@
 <template>
-  <div class="container p-4 space-y-10">
+  <div v-bind="$attrs" class=" space-y-10">
     <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
       Miembros del club - {{ nombre_club }}
     </h1>
-<div class="flex flex-col md:flex-row justify-between w-full md:w-4/5 mx-auto space-y-4 md:space-y-0">
-  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" @click="generarPdf" :disabled="isPdfButtonDisabled">
-    <i class="pi pi-file-pdf mr-2"></i> Generar PDF
-  </Button>
-  <Button class="bg-customBlue-700 text-white px-4 py-2 md:px-6 md:py-3 text-sm md:text-base rounded-lg w-full md:w-auto" @click="showModal = true">
-    <i class="pi pi-user-plus mr-2"></i> Agregar miembro
-  </Button>
-</div>
-    <div class="flex flex-col space-y-10 w-4/5 mx-auto">
+    <div class="flex flex-col md:flex-row justify-between w-full  mx-auto space-y-4 md:space-y-0">
+      <Button
+          class="bg-customBlue-700 text-white"
+          @click="constranciaSeguroMiembros(nombre_club, columns, DataClub)" :disabled="isPdfButtonDisabled">
+        <i class="pi pi-file-pdf mr-2"></i> Generar constancia
+      </Button>
+      <Button
+          class="bg-customBlue-700 text-white"
+          @click="showModal = true">
+        <i class="pi pi-user-plus mr-2"></i> Agregar miembro
+      </Button>
+    </div>
+    <div class="flex flex-col space-y-10  mx-auto">
       <div class="flex flex-col justify-between">
         <span class="text-customBlue-500">Total pagado: {{ totalPagado }}</span>
         <span class="text-customBlue-500">Total pendiente: {{ totalPendiente }}</span>
       </div>
-      <DataTableMiembros :data="transformedData" :columns="columns" :haveActions="true">
+      <DataTableMembersComponent :data="transformedData" :columns="columns" :haveActions="true">
         <template #actions="{data}">
           <div class="flex justify-center items-center">
             <div v-for="(action, index) in actions" :key="index">
               <button :key="action.label" type="button" class="bg-transparent rounded-full px-1"
                       @click="() => action.onClick(data)">
-                <i class="pi pi-eye text-customBlue-500"></i>
+                <i :class="action.icon" class="text-customBlue-500"></i>
               </button>
             </div>
           </div>
         </template>
 
-      </DataTableMiembros>
+      </DataTableMembersComponent>
     </div>
     <Dialog header="Agregar Información" v-model:visible="showModal" :modal="true" :closable="true"
             :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
@@ -81,6 +85,11 @@
           <InputNumber v-model="v$.edad.$model" class="!w-full"/>
           <errors :errors="v$.edad.$errors"/>
         </div>
+        <div class="field">
+          <label for="cuenta">Tipo</label>{{ miembroClub.tipo.nombre }}
+          <Dropdown v-model="v$.tipo.$model" :options="tipo" optionLabel="nombre" placeholder="Tipo" class="!w-full"/>
+          <errors :errors="v$.tipo.$errors"/>
+        </div>
       </div>
       <div class="my-5">
         <h1 class="text-customBlue-700 text-2xl">Información del Responsable</h1>
@@ -107,8 +116,92 @@
           <errors :errors="v$.parentesco_responsable.$errors"/>
         </div>
       </div>
-      <div class="my-5 flex">
-        <Button class="text-white bg-customBlue-700 rounded-lg" icon="pi pi-user-plus" label="Agregar" @click="addConquis"/>
+      <Divider/>
+      <div class="my-5 flex justify-center">
+        <Button class="text-white bg-customBlue-700 rounded-lg" icon="pi pi-user-plus" label="Agregar"
+                @click="SaveMember"/>
+        <Button class=" mx-2" icon="pi pi-times" label="Cancelar"
+                @click="showModal = false" outlined/>
+      </div>
+    </Dialog>
+    <ViewInfoMember
+        v-model="showViewModal"
+        :member="selectedMember"
+    />
+    <Dialog header="Editar Miembro" v-model:visible="showEditModal" :modal="true" :closable="true"
+            :style="{ width: '90vw', maxWidth: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
+      <div class="p-fluid">
+        <h2 class="text-customBlue-700 text-2xl mb-4">Información Personal</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Primer nombre:</h3>
+            <InputText v-model="selectedMember.primer_nombre" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Segundo nombre:</h3>
+            <InputText v-model="selectedMember.segundo_nombre" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Primer apellido:</h3>
+            <InputText v-model="selectedMember.primer_apellido" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Segundo apellido:</h3>
+            <InputText v-model="selectedMember.segundo_apellido" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Teléfono:</h3>
+            <InputMask v-model="selectedMember.telefono" mask="9999-9999" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">¿Es alérgico a?</h3>
+            <InputText v-model="selectedMember.is_alergico_a" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">¿Padece alguna enfermedad?</h3>
+            <InputText v-model="selectedMember.enfermedad_padese" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">¿Medicamento con receta?</h3>
+            <InputText v-model="selectedMember.medicamento_receta" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Edad:</h3>
+            <InputNumber v-model="selectedMember.edad" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Tipo:</h3>
+            <Dropdown v-model="selectedMember.tipo" :options="tipo" optionLabel="nombre"
+                      class="text-customBlack-300 capitalize"/>
+          </div>
+        </div>
+        <h2 class="text-customBlue-700 text-2xl mb-4 mt-4">Información del Responsable</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Nombres:</h3>
+            <InputText v-model="selectedMember.nombres_responsable" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Apellidos:</h3>
+            <InputText v-model="selectedMember.apellidos_responsable" class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Teléfono:</h3>
+            <InputMask v-model="selectedMember.telefono_responsable" mask="9999-9999"
+                       class="text-customBlack-300 capitalize"/>
+          </div>
+          <div>
+            <h3 class="text-customBlack-500 text-xl mb-2">Parentesco:</h3>
+            <InputText v-model="selectedMember.parentesco_responsable" class="text-customBlack-300 capitalize"/>
+          </div>
+        </div>
+        <Divider/>
+        <div class="my-5 flex justify-center">
+          <Button class="text-white bg-customBlue-700 rounded-lg" icon="pi pi-save" label="Actualizar"
+                  @click="saveEditedMember"/>
+          <Button class=" mx-2" icon="pi pi-times" label="Cancelar"
+                  @click="showEditModal = false" outlined/>
+        </div>
       </div>
     </Dialog>
   </div>
@@ -116,32 +209,47 @@
 </template>
 
 <script setup>
+defineOptions({
+  inheritAttrs: true
+});
 import {ref, onMounted, computed} from "vue";
+import {useRoute} from "vue-router";
+import {useVuelidate} from "@vuelidate/core";
+import {helpers, required, maxLength, minLength} from "@vuelidate/validators";
+import {useToast} from "primevue/usetoast";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import InputMask from "primevue/inputmask";
 import InputNumber from "primevue/inputnumber";
+import Divider from "primevue/divider";
 import Button from "primevue/button";
-import axiosInstance from "../../axiosConfig.js";
-import {useVuelidate} from "@vuelidate/core";
-import DataTableMiembros from "../../components/DataTableMiembros.vue";
-import {helpers, required, maxLength, minLength} from "@vuelidate/validators";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import {useRoute, useRouter} from "vue-router";
-import Errors from "../../components/errors.vue";
-import {useToast} from "primevue/usetoast";
+import Dropdown from "primevue/dropdown";
+import DataTableMembersComponent from "../components/DataTableMembersComponent.vue";
+import Errors from "../../../../components/errors.vue";
+import axiosInstance from "../../../../axiosConfig.js";
+import {decrypt} from "../../../../utils/crypto.js";
+import {constranciaSeguroMiembros} from "../../../../utils/constranciaSeguroMiembros.js";
+import ViewInfoMember from "../components/ViewInfoMember.vue";
 
+// Referencias y estados
+const selectedMember = ref({});
+const showViewModal = ref(false);
 const toast = useToast();
-const router = useRouter();
 const route = useRoute()
 const showModal = ref(false);
+const showEditModal = ref(false);
 const DataClub = ref([]);
 const nombre_club = ref("");
+const tipo = ref([
+  {id: 1, nombre: "Aventurero"},
+  {id: 2, nombre: "Conquistador"},
+  {id: 3, nombre: "Guia Mayor"},
+  {id: 4, nombre: "JA"},
+]);
 const textValidation = (value) => {
   if (!value) {
     return true;
-  }else {
+  } else {
     const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
     return reget.test(value);
   }
@@ -149,15 +257,15 @@ const textValidation = (value) => {
 const medicamentoValidation = (value) => {
   if (!value) {
     return true;
-  }else {
-    const reget =  /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,;.\s\-_()]+$/
+  } else {
+    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,;.\s\-_()]+$/
     return reget.test(value);
   }
 }
 const alergiaValidation = (value) => {
   if (!value) {
     return true;
-  }else {
+  } else {
     const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ,\s]+$/
     return reget.test(value);
   }
@@ -176,7 +284,8 @@ const miembroClub = ref({
   apellidos_responsable: "",
   telefono_responsable: "",
   parentesco_responsable: "",
-  pago_seguro: false
+  pago_seguro: false,
+  tipo: "",
 });
 const phoneStart = (number) => {
   if (!number) {
@@ -256,7 +365,10 @@ const rules = {
     minLength: helpers.withMessage("Mínimo 3 caracteres", minLength(3)),
     maxLength: helpers.withMessage("Máximo 25 caracteres", maxLength(25)),
     typeText: helpers.withMessage("Solo se permiten letras", textValidation),
-  }
+  },
+  tipo: {
+    required: helpers.withMessage("El tipo es requerido", required),
+  },
 };
 const isPdfButtonDisabled = computed(() => {
   return DataClub.value.every(item => item.seguro);
@@ -271,19 +383,28 @@ const columns = [
 ];
 const actions = ref([
   {
-    label: "Editar",
-    icon: "visibility",
+    label: "Ver",
+    icon: "pi pi-eye",
     onClick: (value) => {
-      router.push({name: 'Perfil', params: {id: value.id}});
+      selectedMember.value = value;
+      showViewModal.value = true;
+    },
+  },
+  {
+    label: "Editar",
+    icon: "pi pi-pencil",
+    onClick: (value) => {
+      const tipoSeleccionado = tipo.value.find(t => t.nombre === value.tipo.nombre);
+      selectedMember.value = {
+        ...value,
+        tipo: tipoSeleccionado
+      };
+      showEditModal.value = true;
     },
   }
 ]);
 
-/**
- * Add a new member to the club
- * @returns {Promise<void>}
- */
-const addConquis = async () => {
+const SaveMember = async () => {
   if (v$.value.$invalid) {
     v$.value.$touch();
     return;
@@ -291,7 +412,8 @@ const addConquis = async () => {
   try {
     let data = {
       ...miembroClub.value,
-      id_club: parseInt(route.params.id),
+      tipo: miembroClub.value.tipo.nombre,
+      id_club: decrypt(route.params.id)
     };
     const response = await axiosInstance.post('/miembros', data);
     if (response.status === 201) {
@@ -317,13 +439,9 @@ const addConquis = async () => {
   }
 }
 
-/**
- * Fetch the members of the club
- * @returns {Promise<void>}
- */
 const fetchMiembros = async () => {
   try {
-    const id = route.params.id;
+    const id = decrypt(route.params.id);
     const response = await axiosInstance.get(`/miembros/${id}`);
     DataClub.value = response.data;
   } catch (e) {
@@ -331,19 +449,48 @@ const fetchMiembros = async () => {
   }
 }
 
-/**
- * Get the club id
- * @returns {Promise<void>}
- */
 const getClubId = async () => {
   try {
-    const id = route.params.id;
+    const id = decrypt(route.params.id);
     const response = await axiosInstance.get(`/club/${id}`);
     nombre_club.value = response.data.nombre;
   } catch (e) {
     console.error(e);
   }
 }
+const saveEditedMember = async () => {
+  try {
+    const tipoNombre = typeof selectedMember.value.tipo === 'object' && selectedMember.value.tipo !== null
+      ? selectedMember.value.tipo.nombre
+      : selectedMember.value.tipo;
+
+    const data = {
+      ...selectedMember.value,
+      tipo: tipoNombre,
+    };
+
+    const response = await axiosInstance.put(`/miembro/${selectedMember.value.id}`, data);
+    if (response.status === 200) {
+      toast.add({
+        severity: 'success',
+        summary: 'Mensaje de éxito',
+        detail: 'Miembro actualizado con éxito',
+        life: 3000
+      });
+      showEditModal.value = false;
+      await fetchMiembros();
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Mensaje de error',
+        detail: 'Error al actualizar el miembro',
+        life: 3000
+      });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
 const transformedData = computed(() => {
   return DataClub.value.map(member => ({
     ...member,
@@ -378,43 +525,7 @@ const totalPagado = computed(() => {
 const totalPendiente = computed(() => {
   return DataClub.value.filter(member => !member.seguro).length;
 });
-const generarPdf = () => {
-  const doc = new jsPDF();
-  const title = "ASOCIACION PARACENTRAL SALVADOREÑA";
-  const subtitle = "PAGO DE SEGUROS";
-  const clubName = `Club: ${nombre_club.value}`;
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const titleWidth = doc.getTextWidth(title);
-  const subtitleWidth = doc.getTextWidth(subtitle);
-  const clubNameWidth = doc.getTextWidth(clubName);
-  const titleX = (pageWidth - titleWidth) / 2;
-  const subtitleX = (pageWidth - subtitleWidth) / 2;
-  const clubNameX = (pageWidth - clubNameWidth) / 2;
 
-  doc.text(title, titleX, 10);
-  doc.text(subtitle, subtitleX, 20);
-  doc.text(clubName, clubNameX, 30);
-
-  const newColumns = columns.map(col => ({header: col.header, field: col.field}));
-
-  const transformedDataForPdf = DataClub.value
-      .filter(member => !member.seguro)
-      .map(member => ({
-        ...member,
-        seguro: 'pendiente'
-      }));
-
-  doc.autoTable({
-    head: [newColumns.map(col => col.header)],
-    body: transformedDataForPdf.map(member => newColumns.map(col => member[col.field])),
-    startY: 40
-  });
-
-  const totalAmount = transformedDataForPdf.length * 1.50;
-  doc.text(`Total a pagar: $${totalAmount.toFixed(2)}`, 14, doc.autoTable.previous.finalY + 10);
-
-  doc.save(`${clubName}.pdf`);
-};
 </script>
 
 <style>

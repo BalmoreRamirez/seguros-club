@@ -1,36 +1,69 @@
 <template>
-  <nav class="px-4 sm:px-10 flex justify-between items-center text-white py-4 shadow-lg bg-customWhite-500">
-    <span v-if="id_role===1"><router-link to="/homeAdmin"
-                                          class="uppercase text-customBlack-500">Seguros aps</router-link></span>
-    <span v-else><router-link to="/home" class="uppercase text-customBlack-500">Seguros aps</router-link></span>
-    <div v-if="isLoggedIn" class="text-center sm:text-left text-customBlack-500">Bienvenido, <span
-        class="mx-2">{{ mensaje }}</span></div>
-    <Button type="button" icon="pi pi-user" @click="toggle" aria-haspopup="true" aria-controls="overlay_menu"
-            v-if="isLoggedIn" class="bg-customBlue-700"/>
-    <Menu ref="menu" id="overlay_menu" :model="items" :popup="true"/>
-  </nav>
-  <router-view></router-view>
+  <div class="h-screen overflow-hidden relative">
+    <div v-if="isLoggedIn">
+      <aside
+          class="fixed top-0 left-0 h-full w-full md:w-64 bg-customWhite-500  p-4 z-20 transform transition-transform duration-300 ease-in-out"
+          :class="{ '-translate-x-full': !menuOpen, 'translate-x-0': menuOpen }">
+        <div class="text-center mb-4">
+          <p class="text-customBlack-500">Seguros APS</p>
+        </div>
+        <div class="flex justify-between">
+          <Menu :model="filteredSidebarItems" class="border border-none" @item-select="hideSidebar">
+            <template #item="{ item }">
+              <div :class="{ 'active-menu-item': isActiveRoute(item.path) }" class="menu-item">
+                <i :class="item.icon"></i>
+                <span>{{ item.label }}</span>
+              </div>
+            </template>
+          </Menu>
+          <div class="md:hidden">
+            <i class="pi pi-times text-customBlack-500" @click="menuOpen = !menuOpen"></i>
+          </div>
+        </div>
+        <div class="bg-pastelGreen-500  bottom-0 absolute cursor-pointer px-5 py-2 rounded-lg w-[80%] mb-6"
+             @click="handleLogout">
+          <i class="pi pi-sign-out text-customBlack-500 mr-2"></i>Cerrar sesión
+        </div>
+      </aside>
+    </div>
+
+    <div class="flex-1 transition-all duration-300 ease-in-out p-6"
+         :class="{ 'ml-64': menuOpen && isLoggedIn, 'ml-0': !menuOpen || !isLoggedIn }">
+      <button
+          v-if="isLoggedIn"
+          @click="menuOpen = !menuOpen"
+          class="mb-4 px-4 py-2 text-customBlack-500 rounded"
+      >
+        <i class="pi pi-bars"></i>
+      </button>
+      <router-view></router-view>
+    </div>
+  </div>
 </template>
-
 <script setup>
-import {useRouter} from 'vue-router';
+import {useRouter, useRoute} from 'vue-router';
 import {ref, computed, onMounted, watch} from 'vue';
-import Button from 'primevue/button';
 import Menu from 'primevue/menu';
-import {logout, user_id, id_role} from './utils/auth.js';
+import {user_id, id_role, logout} from './utils/auth.js';
 
+const menuOpen = ref(true);
 const mensaje = ref("");
 const router = useRouter();
-const menu = ref(null);
-const items = ref([
-  {
-    label: 'Cerrar sesión',
-    icon: 'pi pi-sign-out',
-    command: () => {
-      handleLogout();
-    }
-  },
+const route = useRoute();
+const isSidebarOpen = ref(false);
+const isLargeScreen = ref(window.innerWidth >= 641);
+const sidebarItems = ref([
+  {label: 'Inicio', icon: 'pi pi-home', command: () => navigateTo('/homeadmin'), roles: [1], path: '/homeadmin'},
+  {label: 'Inicio', icon: 'pi pi-home', command: () => navigateTo('/homemanager'), roles: [2], path: '/homemanager'},
+  {label: 'Miembros', icon: 'pi pi-users', command: () => navigateTo('/miembros'), roles: [], path: '/miembros'},
+  {label: 'Mi club', icon: 'pi pi-users', command: () => navigateTo('/home'), roles: [2], path: '/home'},
+  {label: 'Usuarios', icon: 'pi pi-cog', command: () => navigateTo('/users'), roles: [1], path: '/users'},
+  {label: 'Clubes', icon: 'pi pi-users', command: () => navigateTo('/listClubes'), roles: [1], path: '/listClubes'},
 ]);
+
+const filteredSidebarItems = computed(() => {
+  return sidebarItems.value.filter(item => item.roles.includes(id_role.value));
+});
 
 const isLoggedIn = computed(() => user_id.value !== null);
 
@@ -42,23 +75,62 @@ const messageRole = () => {
   }
 };
 
+const hideSidebar = () => {
+  isLargeScreen.value = window.innerWidth >= 641;
+  if (!isLargeScreen.value) {
+    menuOpen.value = !menuOpen.value;
+  }
+};
+
+const navigateTo = (path) => {
+  router.push(path);
+  hideSidebar();
+};
+
+const updateScreenSize = () => {
+  isLargeScreen.value = window.innerWidth >= 641;
+  if (isLargeScreen.value) {
+    isSidebarOpen.value = false;
+  }
+};
+
 const handleLogout = () => {
   logout(router);
   id_role.value = 0;
   mensaje.value = "";
-  localStorage.removeItem('user_id'); // Clear user_id from localStorage
-  localStorage.removeItem('id_role'); // Clear id_role from localStorage
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('id_role');
 };
 
-const toggle = (event) => {
-  menu.value.toggle(event);
+const isActiveRoute = (path) => {
+  return route.path === path;
 };
+
+window.addEventListener('resize', updateScreenSize);
 
 onMounted(() => {
-  messageRole();
+  updateScreenSize();
+  menuOpen.value = !!isLargeScreen.value;
 });
 
 watch(user_id, () => {
   messageRole();
 });
 </script>
+<style>
+.active-menu-item {
+  background-color: #D1FFD6; /* Cambia esto al color que desees para resaltar */
+  color: #000; /* Cambia esto al color que desees para el texto */
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.menu-item i {
+  margin-right: 10px;
+}
+</style>

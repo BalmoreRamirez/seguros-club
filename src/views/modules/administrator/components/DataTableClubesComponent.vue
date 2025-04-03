@@ -1,5 +1,5 @@
 <template>
-<div  class="bg-customWhite-500 p-3 rounded-md shadow-md">
+<div  class="card w-auto">
   <DataTable :value="data" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"
              tableStyle="min-width: 50rem">
     <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>

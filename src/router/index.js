@@ -1,45 +1,20 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import {is_admin} from "../utils/auth.js";
+import administratorRoutes from "../views/modules/administrator/routes/administratorRoutes.js";
+import managerRoutes from "../views/modules/manager/routes/managerRoutes.js";
 
 const isAuthenticated = () => {
     return localStorage.getItem('auth') !== null;
 };
+
 const routes = [
+    ...administratorRoutes,
+    ...managerRoutes,
     {
         path: '/',
         name: 'Login',
-        component: () => import('../views/Login.vue')
+        component: () => import('../views/modules/Auth/Login.vue')
     },
-    {
-        path: '/home',
-        name: 'Home',
-        component: () => import('../views/director/Home.vue'),
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/homeAdmin',
-        name: 'HomeAdmin',
-        component: () => import('../views/admin/Home.vue'),
-        meta: {requiresAuth: true, requiresAdmin: true}
-    },
-    {
-        path: '/detalleClub/:id',
-        name: 'DetalleClub',
-        component: () => import('../views/director/DetalleClub.vue'),
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/perfil/:id',
-        name: 'Perfil',
-        component: () => import('../views/director/perfil.vue'),
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/clubes/:id',
-        name: 'Clubes',
-        component: () => import('../views/admin/Clubes.vue'),
-        meta: {requiresAuth: true, requiresAdmin: true}
-    }
 ];
 
 const router = createRouter({
@@ -52,7 +27,6 @@ router.beforeEach((to, from, next) => {
         if (!isAuthenticated()) {
             next({name: 'Login'});
         } else if (to.matched.some(record => record.meta.requiresAdmin)) {
-
             if (is_admin.value) {
                 next();
             } else {

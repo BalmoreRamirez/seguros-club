@@ -42,8 +42,8 @@ import Password from 'primevue/password';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import FloatLabel from 'primevue/floatlabel';
-import axiosInstance from "../axiosConfig.js";
-import {is_admin, setToken} from "../utils/auth.js";
+import axiosInstance from "../../../axiosConfig.js";
+import {is_admin, setToken} from "../../../utils/auth.js";
 
 const username = ref('');
 const password = ref('');
