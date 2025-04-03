@@ -47,7 +47,7 @@
             <i class="pi pi-trash text-customBlue-700 px-1 cursor-pointer" @click="deleteMember(slotProps.data)"></i>
           </template>
         </Column>
-      </DataTable >
+      </DataTable>
     </div>
 
   </div>
@@ -129,6 +129,8 @@ import DataTable from "primevue/datatable";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Tag from "primevue/tag";
+import {decrypt} from "../../../../utils/crypto.js";
+import adminServices from "../services/adminServices.js";
 
 const club_name = ref("");
 const DataClub = ref([]);
@@ -154,7 +156,6 @@ const selectedStatusInsurance = ref([]);
 const showEditModal = ref(false);
 const toast = useToast();
 const route = useRoute();
-const router = useRouter();
 
 const columns = [
   {field: "nombres", header: "Nombres"},
@@ -166,8 +167,8 @@ const columns = [
 
 const fetchMiembros = async () => {
   try {
-    const id = route.params.id;
-    const response = await axiosInstance.get(`/miembros/${id}`);
+    const id_club = decrypt(route.params.id);
+    const response = await adminServices.getAllMembersClub(id_club)
     DataClub.value = response.data;
     DataClub.value.forEach((item) => {
       if (item.seguro) {
@@ -181,8 +182,8 @@ const fetchMiembros = async () => {
 
 const getClubId = async () => {
   try {
-    const id = route.params.id;
-    const response = await axiosInstance.get(`/club/${id}`);
+    const id_club = decrypt(route.params.id);
+    const response = await adminServices.getInfoClub(id_club)
     club_name.value = response.data.nombre;
   } catch (e) {
     console.error(e);
@@ -232,11 +233,7 @@ const UpdateSecureState = async () => {
     console.error(e);
   }
 };
-/**
- * Editar miembro
- * @param member
- * @returns {Promise<void>}
- */
+
 const editMember = async (member) => {
   try {
     const response = await axiosInstance.get(`/miembro/${member.id}`);
@@ -264,11 +261,6 @@ const editMember = async (member) => {
   }
 };
 
-/**
- * Borrar miembro
- * @param member
- * @returns {Promise<void>}
- */
 const deleteMember = async (member) => {
   try {
     const response = await axiosInstance.delete(`/miembro/${member.id}`);

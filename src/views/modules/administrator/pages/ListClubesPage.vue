@@ -1,23 +1,17 @@
 <template>
   <div class="space-y-10">
-    <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">
-      {{ is_admin ? ' Lista de clubes' : 'Mi club' }}
-    </h1>
+    <h1 class="text-2xl font-bold text-center mt-5 uppercase text-customBlack-500">Lista de clubes</h1>
     <div class="flex flex-col md:flex-row justify-between w-full  mx-auto space-y-4 md:space-y-0">
-      <Button
-          class="bg-customBlue-700 text-white"
-          v-if="is_admin" @click="generarPdf(DataClub,columns)">
+      <Button class="bg-customBlue-700 text-white" v-if="is_admin" @click="generarPdf(DataClub, columns)">
         <i class="pi pi-file-pdf mr-2"></i> Exportar a PDF
       </Button>
-      <Button
-          class="bg-customBlue-700 text-white"
-          v-if="is_admin" @click="reporteGeneral">
+      <Button class="bg-customBlue-700 text-white" v-if="is_admin" @click="reporteGeneral">
         <i class="pi pi-chart-bar mr-2"></i> Reporte General
       </Button>
     </div>
     <div class="space-y-10">
       <DataTableClubesComponent :data="DataClub" :columns="columns" :haveActions="true">
-        <template #actions="{data}">
+        <template #actions="{ data }">
           <div class="flex justify-left items-center">
             <div v-for="(action, index) in actions" :key="index">
               <button :key="action.label" type="button" class="bg-transparent rounded-full px-1"
@@ -47,13 +41,11 @@
           <InputText v-model="v$.distrito.$model" class="!w-full"/>
           <errors :errors="v$.distrito.$errors"/>
         </div>
-
         <div class="field flex flex-col">
           <label for="cuenta">Zona</label>
           <Dropdown v-model="v$.zona.$model" :options="zonas" optionLabel="nombre" placeholder="Zonas" class="!w-full"/>
           <errors :errors="v$.zona.$errors"/>
         </div>
-
         <div class="field">
           <label for="cuenta">Pastor</label>
           <InputText v-model="v$.pastor.$model" class="!w-full"/>
@@ -65,9 +57,7 @@
           </p>
         </div>
         <div class="field">
-          <Button class="text-white bg-customBlue-700 rounded-lg" label="Actualizar" @click="updateClub"
-                  v-if="opcionActualizar"/>
-          <Button class="text-white bg-customBlue-700 rounded-lg" label="Agregar" @click="agregarClub" v-else/>
+          <Button class="text-white bg-customBlue-700 rounded-lg" label="Actualizar" @click="updateClub"/>
         </div>
       </div>
     </Dialog>
@@ -82,16 +72,17 @@ import {useToast} from "primevue/usetoast";
 import {useVuelidate} from "@vuelidate/core";
 import {helpers, maxLength, minLength, required} from "@vuelidate/validators";
 import "jspdf-autotable";
-import axiosInstance from "../../../../axiosConfig.js";
 import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import Dropdown from "primevue/dropdown";
-import Errors from "../../../../components/errors.vue";
 import InputText from "primevue/inputtext";
-import {id_role, is_admin, logout, user_id} from "../../../../utils/auth.js";
+import Errors from "../../../../components/errors.vue";
 import DataTableClubesComponent from "../components/DataTableClubesComponent.vue";
 import {generarPdf} from "../../../../utils/ListClubesPdf.js";
 import {reporteGeneral} from "../../../../utils/ClubesReportGeneral.js";
+import {id_role, is_admin, user_id} from "../../../../utils/auth.js";
+import adminServices from "../services/adminServices.js";
+import {encrypt} from "../../../../utils/crypto.js";
 
 const toast = useToast();
 const router = useRouter();
@@ -108,39 +99,24 @@ const club = ref({
 });
 
 const zonas = ref([
-  {
-    "id": 1,
-    "nombre": "Zona 1"
-  },
-  {
-    "id": 2,
-    "nombre": "Zona 2"
-  },
-  {
-    "id": 3,
-    "nombre": "Zona 3"
-  },
-  {
-    "id": 4,
-    "nombre": "Zona 4"
-  }
-])
+  {id: 1, nombre: "Zona 1"},
+  {id: 2, nombre: "Zona 2"},
+  {id: 3, nombre: "Zona 3"},
+  {id: 4, nombre: "Zona 4"}
+]);
+
 const textValidation = (value) => {
-  if (!value) {
-    return true;
-  } else {
-    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
-    return reget.test(value);
-  }
-}
+  if (!value) return true;
+  const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+  return reget.test(value);
+};
+
 const textNumberValidation = (value) => {
-  if (!value) {
-    return true;
-  } else {
-    const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s1-9]+$/
-    return reget.test(value);
-  }
-}
+  if (!value) return true;
+  const reget = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s1-9]+$/;
+  return reget.test(value);
+};
+
 const rules = {
   iglesia: {
     required: helpers.withMessage("La iglesia es requerida", required),
@@ -170,6 +146,7 @@ const rules = {
     typeText: helpers.withMessage("Solo se permiten letras", textValidation),
   },
 };
+
 const v$ = useVuelidate(rules, club);
 
 const columns = [
@@ -188,24 +165,25 @@ const actions = ref([
     label: "Ver",
     icon: () => "pi pi-eye",
     onClick: (value) => {
+      const encryptedId = encrypt(value.id.toString());
       if (is_admin.value) {
-        router.push({name: 'Clubes', params: {id: value.id}});
+        router.push({name: 'Clubes', params: {id: encryptedId}});
       } else {
-        router.push({name: 'DetalleClub', params: {id: value.id}});
+        router.push({name: 'DetalleClub', params: {id: encryptedId}});
       }
     },
   },
   {
     label: (club) => club.estado ? "Deactivate" : "Activate",
     icon: (club) => club.estado ? "pi pi-times" : "pi pi-check",
-    onClick: (club) => toggleClubState(club),
+    onClick: (club) => updateClubStatus(club),
   },
   {
     label: 'Editar',
     icon: () => 'pi pi-pencil',
     onClick: (value) => {
       opcionActualizar.value = true;
-      idClubActualizar.value = value.id;
+      idClubActualizar.value = parseInt(value.id);
       club.value = {
         iglesia: value.iglesia,
         distrito: value.distrito,
@@ -218,13 +196,9 @@ const actions = ref([
   }
 ]);
 
-/**
- * Fetch the clubs
- * @returns {Promise<void>}
- */
 const listarClubes = async () => {
   try {
-    const response = await axiosInstance.get(`/clubs/${id_role.value}/${user_id.value}`);
+    const response = await adminServices.ListClubes(id_role.value, user_id.value);
     DataClub.value = response.data;
   } catch (e) {
     console.error(e);
@@ -234,14 +208,13 @@ const listarClubes = async () => {
 const updateClub = async () => {
   try {
     const data = {
-      id_usuario: user_id.value,
       iglesia: club.value.iglesia,
       distrito: club.value.distrito,
       zona: club.value.zona.nombre,
       nombre: club.value.nombre,
       pastor: club.value.pastor,
     };
-    const response = await axiosInstance.put(`/clubs/${idClubActualizar.value}`, data);
+    const response = await adminServices.UpdateClub(idClubActualizar.value, data);
     if (response.status === 200) {
       toast.add({
         severity: 'success',
@@ -250,14 +223,7 @@ const updateClub = async () => {
         life: 3000
       });
       await listarClubes();
-      club.value = {
-        iglesia: "",
-        distrito: "",
-        zona: "",
-        nombre: "",
-        pastor: "",
-      };
-      showModal.value = false;
+      resetClubForm();
     } else {
       toast.add({
         severity: 'error',
@@ -269,65 +235,12 @@ const updateClub = async () => {
   } catch (e) {
     console.error(e);
   }
-}
-/**
- * Add a new club
- * @returns {Promise<void>}
- */
-const agregarClub = async () => {
-  if (v$.value.$invalid) {
-    v$.value.$touch();
-    return;
-  }
-  try {
-    const data = {
-      id_usuario: user_id.value,
-      iglesia: club.value.iglesia,
-      distrito: club.value.distrito,
-      zona: club.value.zona.nombre,
-      nombre: club.value.nombre,
-      pastor: club.value.pastor,
-    };
-    const response = await axiosInstance.post('/clubs', data);
-    if (response.status === 201) {
-      toast.add({
-        severity: 'success',
-        summary: 'Mensaje de éxito',
-        detail: 'Club agregado con éxito',
-        life: 3000
-      });
-      await listarClubes();
-      club.value = {
-        iglesia: "",
-        distrito: "",
-        zona: "",
-        nombre: "",
-        pastor: "",
-      };
-      showModal.value = false;
-      logout(router)
-    } else {
-      toast.add({
-        severity: 'error',
-        summary: 'Mensaje de error',
-        detail: 'Error al agregar el club',
-        life: 3000
-      });
-    }
-  } catch (e) {
-    console.error(e);
-  }
-}
+};
 
-/**
- * Delete a club
- * @returns {Promise<void>}
- * @param club
- */
-const toggleClubState = async (club) => {
+const updateClubStatus = async (club) => {
   try {
     const newState = !club.estado;
-    const response = await axiosInstance.put(`/club/${club.id}`);
+    const response = await adminServices.UpdateStatusClub(club.id);
     if (response.status === 200) {
       await listarClubes();
       toast.add({
@@ -341,10 +254,21 @@ const toggleClubState = async (club) => {
     console.error(e);
   }
 };
+
+const resetClubForm = () => {
+  club.value = {
+    iglesia: "",
+    distrito: "",
+    zona: "",
+    nombre: "",
+    pastor: "",
+  };
+  showModal.value = false;
+};
+
 onMounted(() => {
   listarClubes();
 });
-
 </script>
 
 <style>

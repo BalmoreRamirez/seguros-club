@@ -1,58 +1,20 @@
 import {createRouter, createWebHistory} from 'vue-router';
 import {is_admin} from "../utils/auth.js";
+import administratorRoutes from "../views/modules/administrator/routes/administratorRoutes.js";
+import managerRoutes from "../views/modules/manager/routes/managerRoutes.js";
 
 const isAuthenticated = () => {
     return localStorage.getItem('auth') !== null;
 };
+
 const routes = [
+    ...administratorRoutes,
+    ...managerRoutes,
     {
         path: '/',
         name: 'Login',
         component: () => import('../views/modules/Auth/Login.vue')
     },
-    {
-        path: '/home',
-        name: 'Home',
-        component: () => import('../views/modules/manager/pages/InfoClubPage.vue'),
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/listClubes',
-        name: 'ListClubes',
-        component: () => import('../views/modules/administrator/pages/ListClubesPage.vue'),
-        meta: {requiresAuth: true, requiresAdmin: true}
-    },
-    {
-        path: '/detalleClub/:id',
-        name: 'DetalleClub',
-        component: () => import('../views/modules/manager/pages/MembersClubPage.vue'),
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/perfil/:id',
-        name: 'Perfil',
-        component: () => import('../views/modules/manager/pages/PerfilUserPage.vue'),
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/clubes/:id',
-        name: 'Clubes',
-        component: () => import('../views/modules/administrator/pages/MembersClubPage.vue'),
-        meta: {requiresAuth: true, requiresAdmin: true}
-    },
-    {
-        path:'/homeadmin',
-        name: 'HomeAdmin',
-        component: () => import('../views/modules/administrator/pages/HomePage.vue'),
-        meta: {requiresAuth: true, requiresAdmin: true}
-    }
-    ,
-    {
-        path: '/homemanager',
-        name: 'HomeManager',
-        component: () => import('../views/modules/manager/pages/HomePage.vue'),
-        meta: {requiresAuth: true}
-    }
 ];
 
 const router = createRouter({
@@ -65,7 +27,6 @@ router.beforeEach((to, from, next) => {
         if (!isAuthenticated()) {
             next({name: 'Login'});
         } else if (to.matched.some(record => record.meta.requiresAdmin)) {
-
             if (is_admin.value) {
                 next();
             } else {

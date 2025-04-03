@@ -88,6 +88,7 @@ import Errors from "../../../../components/errors.vue";
 import InputText from "primevue/inputtext";
 import {complete_club, id_role, is_admin, logout, user_id} from "../../../../utils/auth.js";
 import DataTableClubesComponent from "../../administrator/components/DataTableClubesComponent.vue";
+import {encrypt} from "../../../../utils/crypto.js";
 
 const toast = useToast();
 const router = useRouter();
@@ -178,10 +179,12 @@ const actions = ref([
     label: "Editar",
     icon: ()=> "pi pi-eye",
     onClick: (value) => {
+      const encryptedId = encrypt(value.id.toString());
+
       if (is_admin.value) {
-        router.push({name: 'Clubes', params: {id: value.id}});
+        router.push({name: 'Clubes', params: {id: encryptedId}});
       } else {
-        router.push({name: 'DetalleClub', params: {id: value.id}});
+        router.push({name: 'DetalleClub', params: {id: encryptedId}});
       }
     },
   }
