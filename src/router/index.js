@@ -11,10 +11,25 @@ const routes = [
     ...administratorRoutes,
     ...managerRoutes,
     {
-        path: '/',
+        path: "/",
+        redirect: "/login"
+    },
+    {
+        path: '/login',
         name: 'Login',
         component: () => import('../views/modules/Auth/Login.vue')
     },
+    {
+        path: '/dashboard',
+        name: 'dashboard',
+        component: () => import('../views/HomePage.vue'),
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () => import('../views/NotFoundPage.vue')
+    }
 ];
 
 const router = createRouter({

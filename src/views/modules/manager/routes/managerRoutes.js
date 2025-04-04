@@ -14,10 +14,4 @@ export default [
         component: () => import('../../manager/pages/InfoClubPage.vue'),
         meta: {requiresAuth: true}
     },
-    {
-        path: '/homemanager',
-        name: 'HomeManager',
-        component: () => import('../../manager/pages/HomePage.vue'),
-        meta: {requiresAuth: true}
-    },
 ];

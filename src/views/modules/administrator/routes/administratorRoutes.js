@@ -8,13 +8,6 @@ export default [
         props: route => ({id: decrypt(route.params.id)})
     },
     {
-        path: '/homeadmin',
-        name: 'HomeAdmin',
-        component: () => import('../../administrator/pages/HomePage.vue'),
-        meta: {requiresAuth: true, requiresAdmin: true}
-    },
-
-    {
         path: '/listClubes',
         name: 'ListClubes',
         component: () => import('../../administrator/pages/ListClubesPage.vue'),

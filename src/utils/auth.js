@@ -6,7 +6,7 @@ let id_role = ref(null);
 let is_admin = ref(null);
 let complete_club = ref(null);
 
-const token = localStorage.getItem('auth');
+const token = sessionStorage.getItem('auth');
 if (token) {
     const decode = jwtDecode(token);
     user_id.value = decode.id;
@@ -23,7 +23,7 @@ export const setToken = (token) => {
     id_role.value = decode.id_role;
     is_admin.value = decode.is_admin;
     complete_club.value = decode.complete_club;
-    localStorage.setItem('auth', token);
+    sessionStorage.setItem('auth', token);
 };
 
 export const clearToken = () => {
@@ -31,8 +31,7 @@ export const clearToken = () => {
     id_role.value = null;
     is_admin.value = null;
     complete_club.value = null;
-    localStorage.removeItem('auth');
-
+    sessionStorage.removeItem('auth');
 };
 
 export const logout = (router) => {

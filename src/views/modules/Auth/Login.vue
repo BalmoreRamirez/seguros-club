@@ -62,7 +62,7 @@ const handleLogin = async () => {
     const token = response.data.token;
     setToken(token);
     if (is_admin){
-      await router.push('/HomeAdmin');
+      await router.push('/dashboard');
     }else{
       await router.push('/home');
     }

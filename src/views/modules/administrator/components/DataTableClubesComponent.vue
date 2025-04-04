@@ -2,8 +2,8 @@
 <div  class="card w-auto">
   <DataTable :value="data" paginator :rows="10" :rowsPerPageOptions="[5, 10, 20, 50]"
              tableStyle="min-width: 50rem">
-    <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header"></Column>
-    <Column header="Estado">
+    <Column v-for="col of columns" :key="col.field" :field="col.field" :header="col.header" sortable></Column>
+    <Column header="Estado" sortable>
       <template #body="{data}" >
         <Tag :value="data.estado" :severity="data.estado?'success' : 'warning'">
           {{data.estado?'Activo':'Inactivo'}}
