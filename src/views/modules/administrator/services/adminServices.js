@@ -24,6 +24,9 @@ const getInfoClub = async (id_club) => {
 const getAllUsers = async () => {
     return await axiosInstance.get(`/users`);
 }
+const saveUser = async (data) => {
+    return await axiosInstance.post(`/users`, data);
+}
 export default {
     ListClubes,
     UpdateClub,
@@ -32,5 +35,6 @@ export default {
     GeneralReport,
     getAllMembersClub,
     getInfoClub,
-    getAllUsers
+    getAllUsers,
+    saveUser
 }

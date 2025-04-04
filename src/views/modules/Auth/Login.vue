@@ -43,7 +43,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import FloatLabel from 'primevue/floatlabel';
 import axiosInstance from "../../../axiosConfig.js";
-import {is_admin, setToken} from "../../../utils/auth.js";
+import {complete_club, is_admin, setToken} from "../../../utils/auth.js";
 
 const username = ref('');
 const password = ref('');
@@ -61,9 +61,9 @@ const handleLogin = async () => {
     });
     const token = response.data.token;
     setToken(token);
-    if (is_admin){
+    if (is_admin || complete_club) {
       await router.push('/dashboard');
-    }else{
+    } else {
       await router.push('/home');
     }
   }
