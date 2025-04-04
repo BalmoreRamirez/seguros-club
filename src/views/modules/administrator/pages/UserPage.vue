@@ -26,13 +26,13 @@
           </template>
         </Column>
 
-        <Column field="password" header="Contraseña" style="width: 20%">
-          <template #editor="{ data, field }">
-            <InputText v-model="data[field]"/>
+        <Column header="Acciones" style="width: 15%; min-width: 10rem">
+          <template #body="slotProps">
+            <Button icon="pi pi-key" class="p-button-rounded p-button-warning p-button-sm mr-2"
+                    @click="openResetPasswordModal(slotProps.data)"
+                    tooltip="Restablecer contraseña" />
           </template>
         </Column>
-        <Column :rowEditor="true" header="Ac" style="width: 10%; min-width: 8rem"
-                bodyStyle="text-align:center"></Column>
       </DataTable>
     </div>
 
@@ -73,6 +73,39 @@
                 :disabled="v$.$invalid || !credentialsCopied"/>
       </template>
     </Dialog>
+    <Dialog v-model:visible="resetPasswordModal" header="Restablecer Contraseña" :modal="true" class="w-[90vw] md:w-[50vw]">
+      <div class="p-fluid">
+        <div class="field mb-4">
+          <label class="font-bold block mb-2">Usuario</label>
+          <InputText v-model="selectedUser.nombre" disabled />
+        </div>
+        <div class="field mb-4">
+          <label class="font-bold block mb-2">Nueva Contraseña</label>
+          <div class="p-inputgroup">
+            <InputText v-model="newPassword" readonly />
+            <Button icon="pi pi-refresh" @click="generateNewPassword" class="bg-customBlue-700" />
+            <Button icon="pi pi-copy" @click="copyNewCredentials"
+                    :disabled="!selectedUser || !newPassword"
+                    class="bg-customBlue-700" />
+          </div>
+          <small class="block mt-1">
+            Genera una contraseña y copia las credenciales antes de guardar.
+            <span v-if="resetCopySuccess" class="text-green-600 ml-2">¡Credenciales copiadas!</span>
+          </small>
+        </div>
+
+        <div v-if="!resetCredentialsCopied && selectedUser && newPassword"
+             class="p-3 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 mt-4">
+          <p>⚠️ Debe copiar las credenciales antes de restablecer la contraseña</p>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="closeResetModal" />
+        <Button label="Restablecer" icon="pi pi-check" class="bg-customBlue-700"
+                @click="resetPassword"
+                :disabled="!resetCredentialsCopied" />
+      </template>
+    </Dialog>
   </div>
   <Toast/>
 </template>
@@ -95,6 +128,12 @@ const editingRows = ref([]);
 const displayModal = ref(false);
 const copySuccess = ref(false);
 const credentialsCopied = ref(false);
+
+const resetPasswordModal = ref(false);
+const selectedUser = ref(null);
+const newPassword = ref('');
+const resetCopySuccess = ref(false);
+const resetCredentialsCopied = ref(false);
 const newUser = ref({
   user: '',
   password: '',
@@ -103,6 +142,76 @@ const newUser = ref({
   id_role: 2
 });
 
+const openResetPasswordModal = (user) => {
+  selectedUser.value = user;
+  newPassword.value = '';
+  resetCredentialsCopied.value = false;
+  resetCopySuccess.value = false;
+  resetPasswordModal.value = true;
+  // Generar contraseña automáticamente al abrir
+  generateNewPassword();
+};
+
+// Función para generar una nueva contraseña
+const generateNewPassword = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  let password = '';
+  for (let i = 0; i < 8; i++) {
+    password += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  newPassword.value = password;
+  resetCredentialsCopied.value = false;
+};
+
+// Función para copiar las credenciales
+const copyNewCredentials = async () => {
+  if (!selectedUser.value || !newPassword.value) return;
+
+  const credentialsText = `Usuario: ${selectedUser.value.nombre}\nContraseña: ${newPassword.value}`;
+
+  try {
+    await navigator.clipboard.writeText(credentialsText);
+    resetCopySuccess.value = true;
+    resetCredentialsCopied.value = true;
+
+    // Ocultar el mensaje de éxito después de 2 segundos
+    setTimeout(() => {
+      resetCopySuccess.value = false;
+    }, 2000);
+  } catch (err) {
+    console.error('Error al copiar: ', err);
+  }
+};
+
+const resetPassword = async () => {
+  if (!selectedUser.value || !newPassword.value || !resetCredentialsCopied.value) return;
+
+  try {
+    await adminServices.resetPassword(selectedUser.value.id, newPassword.value);
+
+    toast.add({
+      severity: 'success',
+      summary: 'Mensaje de éxito',
+      detail: 'Contraseña restablecida correctamente',
+      life: 3000
+    });
+
+    // Actualizar la lista de usuarios para reflejar el cambio
+    await getAllUsers();
+    resetPasswordModal.value = false;
+  } catch (error) {
+    console.error("Error al restablecer contraseña:", error);
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: error.response?.data?.message || 'Error al restablecer la contraseña',
+      life: 3000
+    });
+  }
+};
+const closeResetModal = () => {
+  resetPasswordModal.value = false;
+};
 // Función de validación para solo permitir letras de a-z sin espacios
 const onlyLettersValidation = (value) => {
   if (!value) return true;
@@ -125,7 +234,6 @@ const v$ = useVuelidate(rules, newUser);
 const onRowEditSave = (event) => {
   let {newData, index} = event;
   users.value[index] = newData;
-  console.log(users.value[index]);
 };
 
 const getAllUsers = async () => {

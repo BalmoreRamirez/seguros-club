@@ -27,6 +27,12 @@ const getAllUsers = async () => {
 const saveUser = async (data) => {
     return await axiosInstance.post(`/users`, data);
 }
+const resetPassword = async (userId, newPassword) => {
+    return await axiosInstance.post('/reset-password', {
+        userId,
+        newPassword
+    });
+};
 export default {
     ListClubes,
     UpdateClub,
@@ -36,5 +42,6 @@ export default {
     getAllMembersClub,
     getInfoClub,
     getAllUsers,
-    saveUser
+    saveUser,
+    resetPassword
 }

@@ -245,6 +245,7 @@ const tipo = ref([
   {id: 2, nombre: "Conquistador"},
   {id: 3, nombre: "Guia Mayor"},
   {id: 4, nombre: "JA"},
+  {id: 5, nombre: "Consejero"},
 ]);
 const textValidation = (value) => {
   if (!value) {

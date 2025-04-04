@@ -55,8 +55,9 @@ const getDashboardData = async (id_role, id_club) => {
         throw error;
     }
 }
+
 export default {
     reportByClub,
     reportByClubAll,
-    getDashboardData
+    getDashboardData,
 }
