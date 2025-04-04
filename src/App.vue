@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen overflow-hidden relative">
+  <div class="overflow-hidden relative">
     <!-- Sidebar / Menú lateral -->
     <div v-if="isLoggedIn">
       <aside
