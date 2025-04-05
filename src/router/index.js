@@ -12,7 +12,7 @@ const routes = [
     ...managerRoutes,
     {
         path: "/",
-        redirect: "/login"
+        redirect: "/dashboard"
     },
     {
         path: '/login',
