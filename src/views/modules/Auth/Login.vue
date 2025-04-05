@@ -61,7 +61,7 @@ const handleLogin = async () => {
     });
     const token = response.data.token;
     setToken(token);
-    if (complete_club) {
+    if (is_admin || complete_club) {
       await router.push('/dashboard');
     } else {
       await router.push('/home');
