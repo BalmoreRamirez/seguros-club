@@ -61,11 +61,12 @@ const handleLogin = async () => {
     });
     const token = response.data.token;
     setToken(token);
-    if (is_admin || complete_club) {
+    if (token) {
       await router.push('/dashboard');
-    } else {
-      await router.push('/home');
-    }
+    } 
+    //else {
+      //await router.push('/home');
+    //}
   }
   catch (error) {
     errorMessage.value = error.response.data.message;
