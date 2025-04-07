@@ -41,6 +41,7 @@
           </template>
         </Column>
         <Column field="telefono" header="Teléfono" sortable></Column>
+        <Column field="tipo" header="Tipo" sortable></Column>
         <Column header="Acciones">
           <template #body="slotProps">
             <i class="pi pi-pencil text-customBlue-700 px-1 cursor-pointer" @click="editMember(slotProps.data)"></i>
@@ -175,6 +176,10 @@ const fetchMiembros = async () => {
         selectedStatusInsurance.value.push(item);
       }
     });
+    DataClub.value = DataClub.value.map((item) => ({
+      ...item,
+      tipo: item.tipo.nombre ?  item.tipo.nombre : '-'
+    }));
   } catch (e) {
     console.error(e);
   }

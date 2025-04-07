@@ -379,8 +379,8 @@ const columns = [
   {field: "nombres", header: "Nombres"},
   {field: "apellidos", header: "Apellidos"},
   {field: "edad", header: "Edad"},
-
-  {field: "telefono", header: "Teléfono"}
+  {field: "telefono", header: "Teléfono"},
+  {field: "tipo", header: "Tipo"},
 ];
 const actions = ref([
   {
@@ -445,6 +445,11 @@ const fetchMiembros = async () => {
     const id = decrypt(route.params.id);
     const response = await axiosInstance.get(`/miembros/${id}`);
     DataClub.value = response.data;
+    DataClub.value = DataClub.value.map(member => ({
+      ...member,
+      tipo: member.tipo.nombre? member.tipo.nombre : '-',
+
+    }));
   } catch (e) {
     console.error(e);
   }
