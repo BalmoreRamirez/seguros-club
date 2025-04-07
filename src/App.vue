@@ -54,7 +54,7 @@
 import {ref, computed, onMounted, watch} from 'vue';
 import {useRouter, useRoute} from 'vue-router';
 import Menu from 'primevue/menu';
-import {user_id, id_role, logout} from './utils/auth.js';
+import {user_id, id_role, logout, is_admin} from './utils/auth.js';
 
 // Estado reactivo
 const router = useRouter();

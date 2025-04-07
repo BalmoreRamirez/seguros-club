@@ -4,7 +4,7 @@ import administratorRoutes from "../views/modules/administrator/routes/administr
 import managerRoutes from "../views/modules/manager/routes/managerRoutes.js";
 
 const isAuthenticated = () => {
-    return localStorage.getItem('auth') !== null;
+  return sessionStorage.getItem('authToken') !== null;
 };
 
 const routes = [
@@ -12,7 +12,7 @@ const routes = [
     ...managerRoutes,
     {
         path: "/",
-        redirect: "/dashboard"
+        redirect: "/login",
     },
     {
         path: '/login',
@@ -38,21 +38,21 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-        if (!isAuthenticated()) {
-            next({name: 'Login'});
-        } else if (to.matched.some(record => record.meta.requiresAdmin)) {
-            if (is_admin.value) {
-                next();
-            } else {
-                next({name: 'Home'});
-            }
-        } else {
-            next();
-        }
-    } else {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated()) {
+      next({ name: 'Login' });
+    } else if (to.matched.some(record => record.meta.requiresAdmin)) {
+      if (is_admin.value) {
         next();
+      } else {
+        next({ name: 'dashboard' });
+      }
+    } else {
+      next();
     }
+  } else {
+    next();
+  }
 });
 
 export default router;

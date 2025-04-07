@@ -61,14 +61,11 @@ const handleLogin = async () => {
     });
     const token = response.data.token;
     setToken(token);
+    sessionStorage.setItem('authToken', token); // Almacenar el token en sessionStorage
     if (token) {
       await router.push('/dashboard');
-    } 
-    //else {
-      //await router.push('/home');
-    //}
-  }
-  catch (error) {
+    }
+  } catch (error) {
     errorMessage.value = error.response.data.message;
   } finally {
     loading.value = false;
