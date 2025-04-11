@@ -174,6 +174,7 @@ const columns = [
   {field: 'zona', header: 'Zona'},
   {field: 'pastor', header: 'Pastor'},
 ];
+
 const actions = ref([
   {
     label: "Editar",
@@ -265,29 +266,6 @@ const generarPdf = () => {
   });
   doc.save("lista_de_clubes.pdf");
 }
-
-/**
- * Delete a club
- * @returns {Promise<void>}
- * @param club
- */
-const toggleClubState = async (club) => {
-  try {
-    const newState = !club.estado;
-    const response = await axiosInstance.put(`/club/${club.id}`);
-    if (response.status === 200) {
-      await listarClubes();
-      toast.add({
-        severity: 'success',
-        summary: 'Success Message',
-        detail: `Club ${newState ? 'activado' : 'desactivado'} con éxito`,
-        life: 3000
-      });
-    }
-  } catch (e) {
-    console.error(e);
-  }
-};
 onMounted(() => {
   listarClubes();
 });

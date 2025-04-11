@@ -38,10 +38,11 @@
             :style="{ width: '50rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw'}">
       <div class="my-5">
         <h1 class="text-customBlue-700 text-2xl">Información Personal</h1>
+        <p class="text-sm text-gray-500 mt-1">Los campos marcados con <span class="text-red-500">*</span> son obligatorios</p>
       </div>
       <div class="p-fluid grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="field">
-          <label for="nombres">Primer nombre</label>
+          <label for="nombres">Primer nombre <span class="text-red-500">*</span> </label>
           <InputText v-model="v$.primer_nombre.$model" class="!w-full"/>
           <errors :errors="v$.primer_nombre.$errors"/>
         </div>
@@ -51,7 +52,7 @@
           <errors :errors="v$.segundo_nombre.$errors"/>
         </div>
         <div class="field">
-          <label for="apellidos">Primer apellido</label>
+          <label for="apellidos">Primer apellido <span class="text-red-500">*</span></label>
           <InputText v-model="v$.primer_apellido.$model" class="!w-full"/>
           <errors :errors="v$.primer_apellido.$errors"/>
         </div>
@@ -61,57 +62,58 @@
           <errors :errors="v$.segundo_apellido.$errors"/>
         </div>
         <div class="field">
-          <label for="telefono">Teléfono</label>
+          <label for="telefono">Teléfono <span class="text-red-500">*</span></label>
           <InputMask v-model="v$.telefono.$model" mask="9999-9999" class="!w-full"/>
           <errors :errors="v$.telefono.$errors"/>
         </div>
         <div class="field">
-          <label for="es_alergico">¿Es alérgico a?</label>
+          <label for="es_alergico">¿Es alérgico a? <span class="text-red-500">*</span></label>
           <InputText v-model="v$.is_alergico_a.$model" class="!w-full"/>
           <errors :errors="v$.is_alergico_a.$errors"/>
         </div>
         <div class="field">
-          <label for="enfermedad">¿Padece alguna enfermedad?</label>
+          <label for="enfermedad">¿Padece alguna enfermedad? <span class="text-red-500">*</span></label>
           <InputText v-model="v$.enfermedad_padese.$model" class="!w-full"/>
           <errors :errors="v$.enfermedad_padese.$errors"/>
         </div>
         <div class="field">
-          <label for="medicamento">¿Medicamento con receta?</label>
+          <label for="medicamento">¿Medicamento con receta? <span class="text-red-500">*</span></label>
           <InputText v-model="v$.medicamento_receta.$model" class="!w-full"/>
           <errors :errors="v$.medicamento_receta.$errors"/>
         </div>
         <div class="field">
-          <label for="edad">Edad</label>
+          <label for="edad">Edad <span class="text-red-500">*</span></label>
           <InputNumber v-model="v$.edad.$model" class="!w-full"/>
           <errors :errors="v$.edad.$errors"/>
         </div>
         <div class="field">
-          <label for="cuenta">Tipo</label>{{ miembroClub.tipo.nombre }}
+          <label for="cuenta">Tipo <span class="text-red-500">*</span></label>{{ miembroClub.tipo.nombre }}
           <Dropdown v-model="v$.tipo.$model" :options="tipo" optionLabel="nombre" placeholder="Tipo" class="!w-full"/>
           <errors :errors="v$.tipo.$errors"/>
         </div>
       </div>
-      <div class="my-5">
-        <h1 class="text-customBlue-700 text-2xl">Información del Responsable</h1>
-      </div>
+<div class="my-5">
+  <h1 class="text-customBlue-700 text-2xl">Información del Responsable</h1>
+  <p class="text-sm text-gray-500 mt-1">Los campos marcados con <span class="text-red-500">*</span> son obligatorios</p>
+</div>
       <div class="p-fluid grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="field">
-          <label for="nombres_responsable">Nombres</label>
+          <label for="nombres_responsable">Nombres <span class="text-red-500">*</span></label>
           <InputText v-model="v$.nombres_responsable.$model" class="!w-full"/>
           <errors :errors="v$.nombres_responsable.$errors"/>
         </div>
         <div class="field">
-          <label for="apellidos_responsable">Apellidos</label>
+          <label for="apellidos_responsable">Apellidos <span class="text-red-500">*</span></label>
           <InputText v-model="v$.apellidos_responsable.$model" class="!w-full"/>
           <errors :errors="v$.apellidos_responsable.$errors"/>
         </div>
         <div class="field">
-          <label for="telefono_responsable">Teléfono</label>
+          <label for="telefono_responsable">Teléfono <span class="text-red-500">*</span></label>
           <InputMask v-model="v$.telefono_responsable.$model" mask="9999-9999" class="!w-full"/>
           <errors :errors="v$.telefono_responsable.$errors"/>
         </div>
         <div class="field">
-          <label for="parentesco">Parentesco</label>
+          <label for="parentesco">Parentesco <span class="text-red-500">*</span></label>
           <InputText v-model="v$.parentesco_responsable.$model" class="!w-full"/>
           <errors :errors="v$.parentesco_responsable.$errors"/>
         </div>
@@ -529,6 +531,6 @@ const totalPendiente = computed(() => {
 
 </script>
 
-<style>
-/* TailwindCSS is used for styling */
+<style scoped>
+
 </style>

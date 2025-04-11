@@ -30,6 +30,45 @@
           categorías correspondientes.</p>
       </div>
 
+      <!-- Tarjeta de resumen general -->
+      <div class="mb-8">
+        <div class="card general-summary">
+          <div class="flex justify-content-between align-items-center mb-4">
+            <div class="icon-container bg-pastelBlue-500">
+              <i class="pi pi-chart-bar text-customBlack-500"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-customBlack-600">Resumen General</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="summary-item">
+              <span class="summary-label">Total Miembros</span>
+              <span class="summary-value">{{ totalMiembros }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Con Seguro</span>
+              <span class="summary-value text-green-600">{{ totalConSeguro }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Sin Seguro</span>
+              <span class="summary-value text-red-600">{{ totalSinSeguro }}</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-gray-200">
+            <div class="flex justify-between items-center">
+              <span class="font-medium">Porcentaje asegurado:</span>
+              <div class="relative w-2/3 h-6 bg-gray-200 rounded-full">
+                <div class="absolute top-0 left-0 h-full rounded-full transition-all duration-500"
+                     :style="{ width: porcentajeAsegurado + '%', backgroundColor: getPorcentajeColor(porcentajeAsegurado) }">
+                </div>
+                <span class="absolute inset-0 flex items-center justify-center text-sm font-bold">{{ porcentajeAsegurado }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="(item, index) in dashboardData" :key="index" class="card">
           <div :class="['icon-container', pastelColors[index % pastelColors.length]]">
@@ -66,6 +105,31 @@ const noDataAvailable = computed(() => {
       (item.total || 0) === 0
   );
 });
+
+// Cálculo de totales para la card general
+const totalMiembros = computed(() => {
+  return dashboardData.value.reduce((sum, item) => sum + (item.total || 0), 0);
+});
+
+const totalConSeguro = computed(() => {
+  return dashboardData.value.reduce((sum, item) => sum + (item.conSeguro || 0), 0);
+});
+
+const totalSinSeguro = computed(() => {
+  return dashboardData.value.reduce((sum, item) => sum + (item.sinSeguro || 0), 0);
+});
+
+const porcentajeAsegurado = computed(() => {
+  if (totalMiembros.value === 0) return 0;
+  return Math.round((totalConSeguro.value / totalMiembros.value) * 100);
+});
+
+// Función para obtener el color de la barra de progreso según el porcentaje
+const getPorcentajeColor = (porcentaje) => {
+  if (porcentaje >= 80) return '#34D399'; // Verde para porcentaje alto
+  if (porcentaje >= 50) return '#FBBF24'; // Amarillo para porcentaje medio
+  return '#EF4444'; // Rojo para porcentaje bajo
+};
 
 const fetchDashboardData = async () => {
   try {
@@ -198,6 +262,38 @@ onMounted(() => {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
+.general-summary {
+  text-align: left;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(to right, #f9fafb, #f3f4f6);
+}
+
+.general-summary:hover {
+  transform: none;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
 .icon-container {
   display: flex;
   justify-content: center;
@@ -206,6 +302,10 @@ onMounted(() => {
   width: 60px;
   height: 60px;
   margin: 0 auto 1rem;
+}
+
+.general-summary .icon-container {
+  margin: 0;
 }
 
 .card i {
@@ -220,5 +320,9 @@ onMounted(() => {
 
 .card p {
   margin: 0.5rem 0;
+}
+
+.bg-pastelBlue-500 {
+  background-color: #bfdbfe;
 }
 </style>
