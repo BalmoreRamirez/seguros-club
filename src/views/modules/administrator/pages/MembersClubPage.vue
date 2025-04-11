@@ -214,7 +214,7 @@ const UpdateSecureState = async () => {
     return;
   }
   try {
-    const id_club = route.params.id;
+    const id_club = decrypt(route.params.id);
     const response = await axiosInstance.put('updateMiembros', {
       "id_club": id_club,
       "id_miembros": dataIdMiembros.value
