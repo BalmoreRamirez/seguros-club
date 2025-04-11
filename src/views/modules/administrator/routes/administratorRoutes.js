@@ -1,4 +1,5 @@
 import {decrypt} from "../../../../utils/crypto.js";
+
 export default [
     {
         path: '/clubes/:id',
@@ -17,6 +18,12 @@ export default [
         path: '/users',
         name: 'Users',
         component: () => import('../../administrator/pages/UserPage.vue'),
+        meta: {requiresAuth: true, requiresAdmin: true}
+    },
+    {
+        path: '/historial',
+        name: 'Historial',
+        component: () => import('../../administrator/pages/HistorialPage.vue'),
         meta: {requiresAuth: true, requiresAdmin: true}
     }
 ];

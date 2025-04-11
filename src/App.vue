@@ -69,8 +69,9 @@ const sidebarItems = ref([
   {label: 'Inicio', icon: 'pi pi-home', command: () => navigateTo('/dashboard'), roles: [1, 2], path: '/dashboard'},
   {label: 'Miembros', icon: 'pi pi-users', command: () => navigateTo('/miembros'), roles: [], path: '/miembros'},
   {label: 'Mi club', icon: 'pi pi-users', command: () => navigateTo('/home'), roles: [2], path: '/home'},
-  {label: 'Usuarios', icon: 'pi pi-cog', command: () => navigateTo('/users'), roles: [1], path: '/users'},
   {label: 'Clubes', icon: 'pi pi-users', command: () => navigateTo('/listClubes'), roles: [1], path: '/listClubes'},
+  {label: 'Usuarios', icon: 'pi pi-cog', command: () => navigateTo('/users'), roles: [1], path: '/users'},
+  {label: 'Historial', icon: 'pi pi-history', command: () => navigateTo('/historial'), roles: [1], path: '/historial'},
 ]);
 
 // Propiedades computadas
