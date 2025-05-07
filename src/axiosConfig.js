@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.MODE === 'production'
-    ? import.meta.env.VITE_API_BASE_URL_PRODUCTION
-    : import.meta.env.VITE_API_BASE_URL_DEVELOPMENT;
+const baseURL = 'https://seguros-aps-back.onrender.com/api';
 
 const axiosInstance = axios.create({
     baseURL: baseURL,
