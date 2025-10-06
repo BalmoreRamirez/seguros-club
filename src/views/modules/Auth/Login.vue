@@ -65,9 +65,9 @@ const handleLogin = async () => {
     if (token) {
       await router.push('/dashboard');
     }
-  } catch (error) {
-    errorMessage.value = error.response.data.message;
-  } finally {
+} catch (error) {
+  errorMessage.value = error.response?.data?.message || 'Error al iniciar sesión.';
+} finally {
     loading.value = false;
   }
 };
