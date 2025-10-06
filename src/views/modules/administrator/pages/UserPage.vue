@@ -28,7 +28,7 @@
 
         <Column header="Acciones" style="width: 15%; min-width: 10rem">
           <template #body="slotProps">
-            <Button icon="pi pi-key" class="p-button-rounded p-button-warning p-button-sm mr-2"
+            <Button icon="pi pi-user" class="p-button-rounded p-button-warning p-button-sm mr-2"
                     @click="openResetPasswordModal(slotProps.data)"
                     tooltip="Restablecer contraseña" />
           </template>

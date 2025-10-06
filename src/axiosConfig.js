@@ -3,7 +3,7 @@ import axios from 'axios';
 // Determine the base URL based on the current mode
 const getBaseURL = () => {
     const mode = import.meta.env.MODE || 'development';
-    
+
     if (mode === 'production') {
         return import.meta.env.VITE_API_BASE_URL_PRODUCTION;
     } else {
