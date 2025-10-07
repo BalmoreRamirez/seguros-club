@@ -18,5 +18,11 @@ export default [
         name: 'Users',
         component: () => import('../../administrator/pages/UserPage.vue'),
         meta: {requiresAuth: true, requiresAdmin: true}
+    },
+    {
+        path: '/configuracion',
+        name: 'Configuration',
+        component: () => import('../../administrator/pages/ConfigurationPage.vue'),
+        meta: {requiresAuth: true, requiresAdmin: true}
     }
 ];

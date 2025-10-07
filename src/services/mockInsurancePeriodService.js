@@ -1,31 +1,19 @@
 // Mock service para simular el comportamiento del backend de insurance periods
 // Este archivo simula los endpoints mientras se implementan en el backend real
 
-let mockPeriods = [
-  {
-    id: 1,
-    start_date: '2024-04-01',
-    end_date: '2025-03-31',
-    duration: 365,
-    status: 'Activo',
-    created_by: 1,
-    created_at: '2024-03-15T10:00:00Z',
-    updated_at: '2024-03-15T10:00:00Z'
-  }
-];
-
-let nextId = 2;
+let mockPeriods = [];
+let nextId = 1;
 
 export const mockInsurancePeriodService = {
   // Simula GET /api/insurance-periods/current
   getCurrentInsurancePeriod: () => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         const activePeriod = mockPeriods.find(p => p.status === 'Activo');
         if (activePeriod) {
           resolve({ data: activePeriod });
         } else {
-          resolve({ data: mockPeriods[0] });
+          reject({ response: { status: 404, data: { message: 'No hay período activo' } } });
         }
       }, 300);
     });
@@ -119,19 +107,7 @@ export const mockInsurancePeriodService = {
 
   // Método auxiliar para resetear los datos
   reset: () => {
-    mockPeriods = [
-      {
-        id: 1,
-        start_date: '2024-04-01',
-        end_date: '2025-03-31',
-        duration: 365,
-        status: 'Activo',
-        created_by: 1,
-        created_at: '2024-03-15T10:00:00Z',
-        updated_at: '2024-03-15T10:00:00Z'
-      }
-    ];
-    nextId = 2;
+    mockPeriods = [];
+    nextId = 1;
   }
 };
-

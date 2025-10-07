@@ -54,7 +54,7 @@
 import {ref, computed, onMounted, watch} from 'vue';
 import {useRouter, useRoute} from 'vue-router';
 import Menu from 'primevue/menu';
-import {user_id, id_role, logout, is_admin} from './utils/auth.js';
+import {user_id, id_role, logout} from './utils/auth.js';
 
 // Estado reactivo
 const router = useRouter();
@@ -71,6 +71,7 @@ const sidebarItems = ref([
   {label: 'Mi club', icon: 'pi pi-users', command: () => navigateTo('/home'), roles: [2], path: '/home'},
   {label: 'Usuarios', icon: 'pi pi-cog', command: () => navigateTo('/users'), roles: [1], path: '/users'},
   {label: 'Clubes', icon: 'pi pi-users', command: () => navigateTo('/listClubes'), roles: [1], path: '/listClubes'},
+  {label: 'Configuración', icon: 'pi pi-cog', command: () => navigateTo('/configuracion'), roles: [1], path: '/configuracion'},
 ]);
 
 // Propiedades computadas
