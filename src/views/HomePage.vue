@@ -2,15 +2,18 @@
   <div class="container mx-auto p-4">
     <!-- Mensaje de bienvenida -->
     <div v-if="!loading && !error" class="welcome-message mb-8">
-      <h2 class="text-3xl font-bold text-customBlack-500">
+      <h2 class="text-3xl font-bold text-customBlack-500 flex justify-center flex-col">
         <span v-if="id_role === 1">Bienvenido Administrador</span>
         <span v-else-if="id_role === 2 && clubName">Bienvenido, {{ clubName }}</span>
+        <p>Este seguro vence el <span class="text-yellow-700 font-bold">{{ fechaFin }}</span></p>
       </h2>
     </div>
 
-    <div v-if="id_role === 2 && !clubName" class="alert-message p-4 mb-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+    <div v-if="id_role === 2 && !clubName"
+         class="alert-message p-4 mb-6 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
       <p class="font-bold">¡Bienvenido, Director!</p>
-      <p>No tienes un club asignado aún. Para comenzar, dirígete a la sección "Mi Club" para registrar la información de tu club.</p>
+      <p>No tienes un club asignado aún. Para comenzar, dirígete a la sección "Mi Club" para registrar la información de
+        tu club.</p>
     </div>
     <div v-if="loading" class="text-center">
       <i class="pi pi-spin pi-spinner text-3xl"></i>
@@ -62,7 +65,9 @@
                 <div class="absolute top-0 left-0 h-full rounded-full transition-all duration-500"
                      :style="{ width: porcentajeAsegurado + '%', backgroundColor: getPorcentajeColor(porcentajeAsegurado) }">
                 </div>
-                <span class="absolute inset-0 flex items-center justify-center text-sm font-bold">{{ porcentajeAsegurado }}%</span>
+                <span class="absolute inset-0 flex items-center justify-center text-sm font-bold">{{
+                    porcentajeAsegurado
+                  }}%</span>
               </div>
             </div>
           </div>
@@ -89,12 +94,13 @@ import {ref, onMounted, computed} from 'vue';
 import dashboardService from '../services/dashboardService.js';
 import {user_id, id_role} from '../utils/auth.js';
 import adminServices from '../views/modules/administrator/services/adminServices.js';
+import dayjs from "dayjs";
 
 const dashboardData = ref([]);
 const loading = ref(true);
 const error = ref(null);
 const clubName = ref('');
-
+const fechaFin = ref();
 const pastelColors = ['bg-pastelPink-500', 'bg-pastelGreen-500', 'bg-pastelYellow-500', 'bg-pastelPurple-500'];
 
 // Comprobamos si no hay datos disponibles (todos los totales son 0)
@@ -148,9 +154,6 @@ const fetchDashboardData = async () => {
         clubName.value = clubInfo.data[0].nombre; // Guardar el nombre del club
         response = await dashboardService.reportByClub(id_club);
       } else {
-        // En lugar de lanzar error, manejamos el caso de club no asignado
-        console.log("Director sin club asignado");
-        // Crear respuesta vacía para que se muestren tarjetas con ceros
         response = {
           data: {
             estadisticas: {
@@ -167,6 +170,7 @@ const fetchDashboardData = async () => {
     // Administrador: obtener datos generales
     else if (id_role.value === 1) {
       response = await dashboardService.reportByClubAll();
+      fechaFin.value = response.data.fechaFinalizacion;
     } else {
       throw new Error("Rol no autorizado");
     }
